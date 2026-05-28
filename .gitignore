@@ -1,0 +1,4 @@
+.vercel
+.playwright-mcp
+*.log
+.DS_Store
