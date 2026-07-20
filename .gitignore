@@ -2,3 +2,5 @@
 .playwright-mcp
 *.log
 .DS_Store
+.gstack/
+node_modules/
