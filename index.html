@@ -278,6 +278,219 @@
     .vend-levels { flex-direction: column; }
   }
 
+  /* ---------- driving levels ---------- */
+  .drv-wrap { margin: 32px 0 14px; }
+  .drv-levels { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 18px; }
+  .dlevel {
+    text-align: center; padding: 9px 4px; border-radius: 7px;
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.03em;
+    border: 1.5px solid var(--rule); background: var(--paper); color: var(--faint);
+    cursor: not-allowed; transition: all 0.25s ease; position: relative;
+  }
+  .dlevel b { display: block; font-family: var(--display); font-size: 14px; font-weight: 600; margin-bottom: 1px; letter-spacing: 0; }
+  .dlevel .dsub { display: block; font-size: 9.5px; }
+  .dlevel.active { border-color: var(--ink); color: var(--ink); background: #fff; box-shadow: 3px 3px 0 var(--shadow); }
+  .dlevel.unlocked { cursor: pointer; color: var(--ink-soft); }
+  .dlevel.unlocked:hover { border-color: var(--ink); }
+  .dlevel.done::after { content: "✓"; position: absolute; top: 3px; right: 6px; color: var(--green); font-weight: 700; }
+
+  .drv-scene { background: var(--paper); border: 1.5px solid var(--ink); border-radius: 10px; box-shadow: 8px 8px 0 var(--shadow); overflow: hidden; }
+  .drv-scene.shake { animation: drvshake 0.4s; }
+  @keyframes drvshake { 0%,100%{transform:none;} 20%{transform:translateX(-6px);} 40%{transform:translateX(5px);} 60%{transform:translateX(-4px);} 80%{transform:translateX(3px);} }
+  .drv-hud {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    background: var(--ink); color: var(--paper); padding: 10px 16px;
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .drv-trip { width: 150px; height: 6px; background: rgba(251,249,243,0.15); border-radius: 3px; overflow: hidden; flex: none; }
+  #drv-tripbar { height: 100%; width: 0%; background: #ff9a72; border-radius: 3px; transition: width 0.12s linear; }
+  .drv-road { position: relative; height: 244px; background: #3b3a33; border-top: 3px solid #57554a; border-bottom: 3px solid #57554a; overflow: hidden; user-select: none; -webkit-user-select: none; }
+  .drv-dash {
+    position: absolute; left: -70px; right: -70px; top: 95px; height: 4px;
+    background: repeating-linear-gradient(90deg, #d8d2c4 0 34px, transparent 34px 64px);
+    animation: drvdash 0.45s linear infinite; opacity: 0.75;
+  }
+  .drv-dash.paused { animation-play-state: paused; }
+  @keyframes drvdash { to { transform: translateX(-64px); } }
+  .drv-car { position: absolute; left: 56px; top: 28px; font-size: 36px; line-height: 1; transform: scaleX(-1); transition: top 0.22s cubic-bezier(.4,1.4,.6,1); z-index: 5; filter: drop-shadow(2px 3px 2px rgba(0,0,0,0.35)); }
+  .drv-obs { position: absolute; font-size: 30px; line-height: 1; z-index: 4; }
+  .drv-alert { position: absolute; inset: 0; background: rgba(196,69,31,0.22); display: none; align-items: center; justify-content: center; z-index: 8; }
+  .drv-alert.show { display: flex; }
+  .drv-alert .a-card { background: var(--paper); border: 2.5px solid var(--accent); border-radius: 8px; padding: 14px 22px; text-align: center; box-shadow: 0 6px 24px rgba(0,0,0,0.35); animation: drvpulse 0.5s steps(2) infinite; }
+  @keyframes drvpulse { 50% { border-color: #ffcf5c; } }
+  .a-card .a-title { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.15em; color: var(--accent-deep); text-transform: uppercase; }
+  .a-card .a-count { font-family: var(--display); font-size: 34px; font-weight: 600; line-height: 1.2; margin: 2px 0 6px; }
+  .drv-crash { position: absolute; font-size: 46px; line-height: 1; z-index: 9; display: none; }
+  .drv-crash.show { display: block; animation: poppick 0.35s ease; }
+
+  /* start / verdict overlay — centered card floating on the canvas */
+  .drv-overlay {
+    position: absolute; inset: 0; z-index: 12; display: none;
+    align-items: center; justify-content: center; padding: 14px;
+    background: rgba(18,16,12,0.5);
+  }
+  .drv-overlay.show { display: flex; animation: fadein 0.22s ease; }
+  .drv-card {
+    background: var(--paper); border: 1.5px solid var(--ink); border-left: 4px solid var(--green);
+    border-radius: 8px; padding: 14px 18px; box-shadow: 0 10px 34px rgba(0,0,0,0.45);
+    max-width: 540px; width: 100%; max-height: calc(100% - 22px); overflow: hidden;
+    display: flex; flex-direction: column; gap: 11px;
+  }
+  .drv-card.warn { border-left-color: var(--accent); }
+  .dc-text { font-size: 14px; line-height: 1.42; color: var(--ink); overflow-y: auto; min-height: 0; }
+  .dc-text b { font-family: var(--display); }
+  .dc-text .who { font-family: var(--mono); font-size: 11px; color: var(--faint); display: block; margin-top: 7px; }
+  .dc-btns { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .dc-btns:empty { display: none; }
+  .drv-btn {
+    background: var(--accent); color: #fff; border: none;
+    font-family: var(--mono); font-size: 12.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+    padding: 11px 18px; border-radius: 6px; cursor: pointer;
+    transition: filter 0.12s ease, transform 0.1s ease;
+    touch-action: none; user-select: none; -webkit-user-select: none;
+  }
+  .drv-btn small { font-size: 10px; opacity: 0.8; text-transform: none; }
+  .drv-btn:hover { filter: brightness(1.08); }
+  .drv-btn:active { transform: translateY(2px); }
+  .drv-btn.hold { background: var(--blue); }
+  .drv-btn.hold.held { box-shadow: inset 0 0 0 3px rgba(255,255,255,0.35); transform: translateY(2px); }
+  .drv-hint { font-family: var(--mono); font-size: 11px; color: #e8e2d0; background: rgba(0,0,0,0.42); padding: 5px 10px; border-radius: 5px; backdrop-filter: blur(2px); }
+  .drv-hint b { color: #fff; }
+  .drv-dest {
+    background: #fff; color: var(--ink); border: 1.5px solid var(--ink); border-radius: 7px;
+    font-family: var(--mono); font-size: 11.5px; padding: 7px 13px; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 1px; line-height: 1.2;
+    transition: transform 0.08s ease, background 0.12s ease;
+  }
+  .drv-dest .de-emo { font-size: 19px; }
+  .drv-dest small { color: var(--faint); font-size: 9px; }
+  .drv-dest:hover { background: var(--tag-bg); box-shadow: 2px 2px 0 var(--shadow); }
+  .drv-dest:active { transform: translateY(2px); }
+  .drv-actions { position: absolute; left: 12px; bottom: 14px; z-index: 8; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; max-width: 52%; }
+  .drv-pad { position: absolute; right: 12px; bottom: 12px; z-index: 8; display: flex; gap: 12px; align-items: stretch; }
+  .pad-group { display: flex; gap: 5px; align-items: center; padding: 10px 9px 7px; border: 1.5px solid var(--rule); border-radius: 9px; background: #fff; position: relative; transition: all 0.25s ease; box-shadow: 0 4px 14px rgba(0,0,0,0.35); }
+  .pad-group.steer { flex-direction: column; }
+  .pad-group .pad-tag {
+    position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
+    font-family: var(--mono); font-size: 8.5px; font-weight: 600; letter-spacing: 0.09em;
+    padding: 1px 8px; border-radius: 8px; background: var(--green); color: #fff; white-space: nowrap;
+  }
+  .pad-group.auto { border-color: var(--blue); background: #eef2f7; }
+  .pad-group.auto .pad-tag { background: var(--blue); }
+  .pad-group.auto .pad-btn { opacity: 0.35; cursor: default; }
+  .pad-group.off { border-style: dashed; opacity: 0.45; background: transparent; }
+  .pad-group.off .pad-tag { background: var(--faint); }
+  .pad-group.off .pad-btn { opacity: 0.25; cursor: default; }
+  .pad-btn {
+    width: 46px; height: 40px; border-radius: 8px; border: 1.5px solid var(--ink);
+    background: var(--paper); font-size: 14px; line-height: 1.05; cursor: pointer;
+    font-family: var(--mono); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+    transition: transform 0.08s ease, background 0.12s ease; padding: 0;
+    touch-action: manipulation; user-select: none; -webkit-user-select: none;
+  }
+  .pad-group.steer .pad-btn { height: 30px; }
+  .pad-btn small { font-size: 7.5px; letter-spacing: 0.06em; color: var(--ink-soft); }
+  .pad-btn:active { transform: translateY(2px); }
+  .pad-group:not(.auto):not(.off) .pad-btn:hover { background: #fff; box-shadow: 2px 2px 0 var(--shadow); }
+  .drv-map .lr { grid-template-columns: 70px 1fr 1.1fr; }
+  @media (max-width: 680px) {
+    .drv-levels { grid-template-columns: repeat(3, 1fr); }
+    .drv-road { height: 280px; }
+    .drv-card { flex-direction: column; align-items: stretch; gap: 9px; }
+    .dc-btns { max-width: none; justify-content: center; }
+    .dc-text { font-size: 13px; }
+    .drv-actions { max-width: 60%; }
+    .drv-map .lr { grid-template-columns: 1fr; }
+    .drv-map .lc:nth-child(1), .drv-map .lc:nth-child(3) { border: none; }
+  }
+
+  /* ---------- toy tabs ---------- */
+  .gametabs { display: flex; gap: 8px; margin: 26px 0 16px; }
+  .gtab {
+    flex: 1; font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.04em;
+    padding: 11px 10px; border-radius: 7px; border: 1.5px solid var(--rule);
+    background: var(--paper); color: var(--ink-soft); cursor: pointer; transition: all 0.2s ease;
+  }
+  .gtab.active { border-color: var(--ink); background: #fff; color: var(--ink); box-shadow: 3px 3px 0 var(--shadow); font-weight: 600; }
+  .gtab:hover { border-color: var(--ink); }
+  .gpane-lead { font-size: 16px; color: var(--ink-soft); }
+
+  /* ---------- access-agent builder ---------- */
+  .ac { margin: 30px 0 14px; }
+  @keyframes acIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+  .b-kick { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); margin-bottom: 6px; }
+  .lvl-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+  .lvlc { border: 1.5px solid var(--rule); border-radius: 7px; background: #fff; padding: 10px 8px; cursor: pointer; text-align: center; transition: all 0.2s ease; }
+  .lvlc .l-tag { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); }
+  .lvlc b { display: block; font-family: var(--display); font-size: 16.5px; font-weight: 600; margin: 1px 0 2px; }
+  .lvlc p { font-size: 12px; color: var(--ink-soft); margin: 0; line-height: 1.4; }
+  .lvlc:hover { border-color: var(--ink); }
+  .lvlc.sel { border-color: var(--ink); box-shadow: 3px 3px 0 var(--shadow); background: var(--paper); }
+  .lvl-res { margin-top: 10px; border-top: 1px dashed var(--rule); padding-top: 10px; display: none; }
+  .lvl-res.show { display: block; animation: acIn 0.3s ease; }
+  .ac-pipe { display: flex; align-items: center; margin-bottom: 12px; font-family: var(--mono); }
+  .pblock {
+    flex: 1; text-align: center; border: 1.5px solid var(--rule); background: var(--paper);
+    border-radius: 6px; padding: 7px 4px; font-size: 10.5px; color: var(--faint); transition: all 0.3s ease;
+  }
+  .pblock b { display: block; font-size: 15px; }
+  .pblock.on { border-color: var(--ink); color: var(--ink); background: #fff; box-shadow: 2px 2px 0 var(--shadow); }
+  .pblock.new { border-color: var(--accent); box-shadow: 2px 2px 0 rgba(196,69,31,0.3); }
+  .parrow { width: 20px; text-align: center; color: var(--rule); font-size: 13px; flex: none; }
+  .parrow.on { color: var(--ink); }
+  .ac-main { background: var(--paper); border: 1.5px solid var(--ink); border-radius: 8px; box-shadow: 6px 6px 0 var(--shadow); overflow: hidden; }
+  .ac-head {
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+    background: var(--ink); color: var(--paper); padding: 10px 14px;
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .ac-run {
+    background: var(--accent); color: #fff; border: none; font-family: var(--mono);
+    font-size: 11.5px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+    padding: 8px 14px; border-radius: 5px; cursor: pointer; transition: filter 0.12s ease, transform 0.1s ease;
+  }
+  .ac-run:hover { filter: brightness(1.1); }
+  .ac-run:active { transform: translateY(1px); }
+  .ac-run:disabled { opacity: 0.5; cursor: default; }
+  .ac-inbox { padding: 12px; display: grid; gap: 10px; min-height: 110px; }
+  .ac-empty { color: var(--faint); font-style: italic; text-align: center; padding: 26px 0; font-size: 14px; }
+  .req { border: 1px solid var(--rule); border-left: 3px solid var(--blue); border-radius: 5px; background: #fff; padding: 10px 14px; animation: acIn 0.35s ease; }
+  .req .r-ask { font-size: 14.5px; }
+  .req .r-meta { color: var(--faint); font-size: 12.5px; }
+  .r-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+  .rchip { font-family: var(--mono); font-size: 10.5px; background: var(--tag-bg); border: 1px solid var(--rule); border-radius: 100px; padding: 2px 9px; color: var(--ink-soft); }
+  .r-think { margin-top: 7px; font-size: 13px; color: var(--ink-soft); font-style: italic; }
+  .r-act { margin-top: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; }
+  .r-quiet { color: var(--faint); font-size: 12px; }
+  .r-badge {
+    font-family: var(--mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.05em;
+    text-transform: uppercase; padding: 2px 8px; border-radius: 3px;
+  }
+  .r-badge.none { background: #ebe6d8; color: var(--faint); }
+  .r-badge.would { background: #e6ecf2; color: var(--blue); }
+  .r-badge.grant { background: #d7e6d2; color: var(--green); }
+  .r-badge.route { background: #f4ead0; color: var(--gold); }
+  .r-badge.esc { background: #f3d9d0; color: var(--accent-deep); }
+  .r-btns { display: inline-flex; gap: 6px; }
+  .r-btns button { font-family: var(--body); font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 4px; border: none; cursor: pointer; }
+  .r-btns .ok { background: var(--green); color: #fff; }
+  .r-btns .no { background: #ebe6d8; color: var(--ink); }
+  .r-btns button:hover { filter: brightness(1.08); }
+  .r-mem { margin-top: 7px; font-family: var(--mono); font-size: 10.5px; color: #5e3a7a; }
+  .d-log { font-family: var(--mono); font-size: 10.5px; color: var(--ink-soft); line-height: 1.7; overflow-x: auto; white-space: nowrap; background: #f6f1e3; border: 1px dashed var(--rule); border-radius: 4px; padding: 8px 10px; }
+  .ac-note {
+    background: var(--paper); border-left: 4px solid var(--green);
+    border-top: 1px solid var(--rule); border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+    padding: 14px 20px; margin-top: 14px; font-size: 15px; line-height: 1.55; border-radius: 0 4px 4px 0;
+  }
+  .ac-note b { font-family: var(--display); }
+  .ac-note .who { font-family: var(--mono); font-size: 11.5px; color: var(--faint); display: block; margin-top: 8px; }
+  @media (max-width: 680px) {
+    .lvl-cards { grid-template-columns: 1fr; }
+    .pblock { font-size: 9px; }
+    .parrow { width: 12px; }
+  }
+
   .mini-quotes { display: grid; gap: 14px; margin: 28px 0 34px; }
   .mq {
     background: var(--paper); border-left: 4px solid var(--accent);
@@ -395,313 +608,6 @@
   .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.7s ease, transform 0.7s ease; }
   .reveal.in { opacity: 1; transform: none; }
 
-  /* ========================================================== */
-  /* ============ THE AM-AGENT TOY (the hard part) ============ */
-  /* ========================================================== */
-  .toy {
-    background: var(--paper);
-    border: 1.5px solid var(--ink);
-    box-shadow: 8px 8px 0 var(--shadow);
-    border-radius: 4px;
-    margin: 30px 0 12px;
-    overflow: hidden;
-  }
-  /* top bar — clock, controls, counters */
-  .toy-top {
-    background: var(--ink);
-    color: var(--paper);
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: 12px;
-    align-items: center;
-    padding: 14px 18px;
-  }
-  .toy-date {
-    font-family: var(--display);
-    font-style: italic;
-    font-size: 22px;
-    font-weight: 500;
-    letter-spacing: -0.01em;
-    line-height: 1.1;
-  }
-  .toy-date small {
-    display: block;
-    font-family: var(--mono);
-    font-style: normal;
-    font-size: 10px;
-    letter-spacing: 0.18em;
-    color: rgba(251,249,243,0.55);
-    margin-bottom: 2px;
-    text-transform: uppercase;
-  }
-  .toy-controls { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
-  .toy-btn {
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    font-family: var(--mono);
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    padding: 9px 16px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: filter 0.12s ease, transform 0.1s ease;
-    white-space: nowrap;
-  }
-  .toy-btn:hover { filter: brightness(1.1); }
-  .toy-btn:active { transform: translateY(2px); }
-  .toy-btn:disabled { opacity: 0.45; cursor: default; transform: none; filter: none; }
-  .toy-btn.ghost { background: transparent; color: var(--paper); border: 1.5px solid rgba(251,249,243,0.3); }
-  .toy-btn.ghost:hover { background: rgba(251,249,243,0.08); }
-  .toy-counters { display: flex; gap: 16px; align-items: center; }
-  .toy-count {
-    text-align: right;
-    font-family: var(--mono);
-    line-height: 1.1;
-  }
-  .toy-count b { display: block; font-family: var(--display); font-size: 22px; font-weight: 600; color: var(--paper); }
-  .toy-count span { font-size: 9.5px; letter-spacing: 0.14em; color: rgba(251,249,243,0.55); text-transform: uppercase; }
-  .toy-count.acted b { color: #ff9a72; }
-
-  /* main grid: book | diary, with action log under */
-  .toy-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0;
-  }
-  .toy-pane { padding: 14px 16px; min-height: 320px; }
-  .toy-pane.book { border-right: 1px solid var(--rule); }
-  .toy-pane .pane-head {
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--faint);
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-  }
-  .toy-pane .pane-head .ph-sub {
-    font-family: var(--body);
-    font-size: 11px;
-    letter-spacing: 0;
-    text-transform: none;
-    color: var(--ink-soft);
-    font-weight: 400;
-  }
-
-  /* the book */
-  .book-list {
-    max-height: 360px;
-    overflow-y: auto;
-    border: 1px solid var(--rule);
-    border-radius: 3px;
-    background: #fff;
-  }
-  .book-list::-webkit-scrollbar { width: 7px; }
-  .book-list::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 3px; }
-  .acct {
-    display: grid;
-    grid-template-columns: 24px 1fr auto;
-    gap: 8px;
-    align-items: center;
-    padding: 7px 10px;
-    border-bottom: 1px solid #f0ebdc;
-    font-size: 12.5px;
-    cursor: default;
-    transition: background 0.4s ease, box-shadow 0.4s ease;
-  }
-  .acct:last-child { border-bottom: none; }
-  .acct .acct-num {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--faint);
-    text-align: right;
-  }
-  .acct .acct-name { font-weight: 500; color: var(--ink); }
-  .acct .acct-meta { font-family: var(--mono); font-size: 10px; color: var(--faint); display: flex; gap: 6px; align-items: center; }
-  .acct .h-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
-  .acct .h-good { background: #6fb56c; }
-  .acct .h-watch { background: #d9a834; }
-  .acct .h-risk { background: #d96434; }
-  .acct.scan {
-    background: #fff8e6;
-    box-shadow: inset 3px 0 0 #d9a834;
-  }
-  .acct.flag {
-    background: #fdeee8;
-    box-shadow: inset 3px 0 0 var(--accent);
-  }
-
-  /* diary */
-  .diary {
-    background: #0c1a12;
-    color: #9cf09c;
-    font-family: var(--mono);
-    font-size: 12px;
-    line-height: 1.55;
-    border-radius: 4px;
-    padding: 12px 14px;
-    max-height: 360px;
-    overflow-y: auto;
-    border: 1px solid rgba(111,207,111,0.15);
-  }
-  .diary::-webkit-scrollbar { width: 7px; }
-  .diary::-webkit-scrollbar-thumb { background: rgba(111,207,111,0.2); border-radius: 3px; }
-  .diary-line { margin-bottom: 4px; }
-  .diary-line .t { color: #5a9c5a; margin-right: 8px; }
-  .diary-line.obs { color: #5a9c5a; }
-  .diary-line.act { color: #cfffcf; }
-  .diary-line.act b { color: #fff; font-weight: 600; }
-  .diary-line.skip { color: #4a8a4a; opacity: 0.85; }
-  .diary-line.flag { color: #ffcf5c; }
-  .diary-line.flag b { color: #fff8d0; font-weight: 600; }
-  .diary-line.esc { color: #ff7a52; }
-  .diary-line.esc b { color: #ffd0bd; font-weight: 600; }
-  .diary-line.dayhead {
-    color: #6fcf6f;
-    border-top: 1px dashed rgba(111,207,111,0.2);
-    margin-top: 8px;
-    padding-top: 8px;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-  }
-  .diary-line.dayhead:first-child { border-top: none; margin-top: 0; padding-top: 0; }
-  .diary-empty {
-    color: #5a9c5a;
-    font-style: italic;
-    text-align: center;
-    padding: 30px 0;
-  }
-  .diary-typing::after {
-    content: "▍";
-    animation: blink 1s steps(2) infinite;
-    color: #6fcf6f;
-  }
-
-  /* action log */
-  .toy-log {
-    border-top: 1px solid var(--rule);
-    background: #f6f1e3;
-    padding: 14px 16px;
-  }
-  .log-head {
-    font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em;
-    text-transform: uppercase; color: var(--faint); margin-bottom: 10px;
-    display: flex; justify-content: space-between; align-items: baseline;
-  }
-  .log-rows {
-    max-height: 180px;
-    overflow-y: auto;
-    background: #fff;
-    border: 1px solid var(--rule);
-    border-radius: 3px;
-  }
-  .log-rows::-webkit-scrollbar { width: 7px; }
-  .log-rows::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 3px; }
-  .log-empty { padding: 20px; color: var(--faint); font-style: italic; font-size: 13.5px; text-align: center; }
-  .log-row {
-    display: grid;
-    grid-template-columns: 70px 110px 1fr;
-    gap: 12px;
-    padding: 9px 12px;
-    border-bottom: 1px solid #f0ebdc;
-    font-size: 13px;
-    align-items: baseline;
-    animation: logIn 0.4s ease;
-  }
-  @keyframes logIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
-  .log-row:last-child { border-bottom: none; }
-  .log-row .l-day { font-family: var(--mono); font-size: 11px; color: var(--faint); }
-  .log-row .l-kind {
-    font-family: var(--mono); font-size: 10.5px; font-weight: 600;
-    letter-spacing: 0.05em; text-transform: uppercase;
-    padding: 2px 7px; border-radius: 3px; align-self: center;
-  }
-  .log-row .l-kind.send { background: #d7e6d2; color: var(--green); }
-  .log-row .l-kind.route { background: #d4dde8; color: var(--blue); }
-  .log-row .l-kind.discount { background: #f4ead0; color: var(--gold); }
-  .log-row .l-kind.draft { background: #ebe6d8; color: var(--ink-soft); }
-  .log-row .l-kind.escalate { background: #f3d9d0; color: var(--accent-deep); }
-  .log-row .l-kind.pattern { background: #e8dff0; color: #5e3a7a; }
-  .log-row .l-detail { color: var(--ink); line-height: 1.4; }
-  .log-row .l-detail b { font-weight: 600; }
-  .log-row .l-detail em { color: var(--ink-soft); font-style: italic; font-size: 12px; display: block; margin-top: 2px; }
-
-  /* escalation modal */
-  .esc-modal {
-    position: fixed; inset: 0; background: rgba(20,20,16,0.55);
-    display: none; align-items: center; justify-content: center;
-    z-index: 200; padding: 20px;
-  }
-  .esc-modal.show { display: flex; animation: fadein 0.25s ease; }
-  @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
-  .esc-card {
-    background: var(--paper); border: 2px solid var(--ink);
-    border-radius: 6px; max-width: 460px; width: 100%;
-    box-shadow: 8px 8px 0 rgba(0,0,0,0.3);
-    overflow: hidden;
-    animation: pop 0.3s cubic-bezier(.3,1.4,.5,1);
-  }
-  @keyframes pop { from { transform: scale(0.92) translateY(20px); } to { transform: none; } }
-  .esc-head {
-    background: var(--accent); color: #fff; padding: 12px 18px;
-    font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  .esc-body { padding: 22px 22px 18px; }
-  .esc-body h4 { font-family: var(--display); font-size: 22px; font-weight: 600; margin-bottom: 6px; line-height: 1.2; }
-  .esc-body .esc-sub { color: var(--faint); font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; margin-bottom: 14px; }
-  .esc-body .esc-why { background: #f6f1e3; border-left: 3px solid var(--gold); padding: 10px 14px; font-size: 14px; line-height: 1.5; color: var(--ink-soft); margin-bottom: 14px; border-radius: 0 3px 3px 0; }
-  .esc-body .esc-draft {
-    background: #fff; border: 1px solid var(--rule); border-radius: 3px;
-    padding: 12px 14px; font-size: 13.5px; line-height: 1.55; color: var(--ink);
-    font-family: Georgia, serif; max-height: 160px; overflow-y: auto;
-    white-space: pre-wrap;
-  }
-  .esc-body .esc-draft b { font-family: var(--body); font-weight: 600; font-size: 11px; letter-spacing: 0.06em; color: var(--faint); display: block; margin-bottom: 4px; text-transform: uppercase; }
-  .esc-foot {
-    display: flex; gap: 10px; padding: 14px 22px 18px; justify-content: flex-end;
-  }
-  .esc-foot button {
-    font-family: var(--body); font-size: 14px; font-weight: 600;
-    padding: 10px 18px; border-radius: 5px; cursor: pointer; border: none;
-    transition: filter 0.12s ease, transform 0.1s ease;
-  }
-  .esc-foot button:hover { filter: brightness(1.08); }
-  .esc-foot button:active { transform: translateY(2px); }
-  .esc-foot .btn-reject { background: #ebe6d8; color: var(--ink); }
-  .esc-foot .btn-approve { background: var(--green); color: #fff; }
-
-  /* toy footer narration */
-  .toy-narration {
-    background: var(--paper);
-    border-left: 4px solid var(--green);
-    border-top: 1px solid var(--rule);
-    border-right: 1px solid var(--rule);
-    border-bottom: 1px solid var(--rule);
-    padding: 14px 20px;
-    margin-top: 16px;
-    font-size: 15.5px;
-    line-height: 1.55;
-    border-radius: 0 4px 4px 0;
-    transition: border-color 0.3s, background 0.3s;
-  }
-  .toy-narration b { font-family: var(--display); }
-  .toy-narration .who { font-family: var(--mono); font-size: 11.5px; color: var(--faint); display: block; margin-top: 8px; }
-
-  @media (max-width: 720px) {
-    .toy-grid { grid-template-columns: 1fr; }
-    .toy-pane.book { border-right: none; border-bottom: 1px solid var(--rule); }
-    .toy-pane { min-height: 0; }
-    .book-list, .diary { max-height: 240px; }
-    .toy-top { grid-template-columns: 1fr; text-align: center; }
-    .toy-counters { justify-content: center; }
-    .log-row { grid-template-columns: 60px 90px 1fr; }
-  }
   @media (max-width: 620px) {
     body { font-size: 17px; }
     .srow { grid-template-columns: 1fr; }
@@ -712,212 +618,6 @@
     ol.loop li { padding-left: 48px; }
   }
 
-  /* =========================================================== */
-  /* ============ THE BUILDER (lean n8n-style) ================= */
-  /* =========================================================== */
-  .builder {
-    background: #14181d;
-    border: 1.5px solid var(--ink);
-    border-radius: 8px;
-    box-shadow: 8px 8px 0 var(--shadow);
-    margin: 30px 0 16px;
-    overflow: hidden;
-    color: #e8e4d8;
-  }
-  .builder-top {
-    background: #0c1014; padding: 12px 16px;
-    display: flex; justify-content: space-between; align-items: center;
-    border-bottom: 1px solid #2a2e36; flex-wrap: wrap; gap: 10px;
-  }
-  .builder-title {
-    font-family: var(--display); font-style: italic; font-size: 18px;
-    color: #f6f1e3; display: flex; align-items: center; gap: 8px;
-  }
-  .builder-title .dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: #6fcf6f; box-shadow: 0 0 8px #6fcf6f;
-  }
-  .builder-ctrl { display: flex; gap: 8px; flex-wrap: wrap; }
-  .b-btn {
-    background: transparent; color: #e8e4d8;
-    border: 1.5px solid #2a2e36;
-    font-family: var(--mono); font-size: 11px; font-weight: 600;
-    letter-spacing: 0.06em; text-transform: uppercase;
-    padding: 7px 13px; border-radius: 5px; cursor: pointer;
-    transition: all 0.15s ease;
-  }
-  .b-btn:hover { border-color: #ff7a52; color: #ff7a52; }
-  .b-btn.primary { background: #ff7a52; color: #0c1014; border-color: #ff7a52; }
-  .b-btn.primary:hover { background: #ff8d68; }
-
-  .builder-canvas {
-    position: relative;
-    background:
-      radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0);
-    background-size: 18px 18px;
-    background-color: #1c2128;
-    padding: 24px 18px;
-    display: grid;
-    grid-template-columns: 1fr 200px 1fr;
-    gap: 30px;
-    min-height: 380px;
-  }
-  .b-col { display: flex; flex-direction: column; gap: 12px; position: relative; z-index: 2; }
-  .b-col-head {
-    font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em;
-    text-transform: uppercase; color: #8a8475; margin-bottom: 2px;
-  }
-  .b-col.brain-col { justify-content: center; align-items: center; }
-  .b-brain {
-    background: linear-gradient(160deg, #2b4a6f, #1a2f4a);
-    border: 2px solid #4a7ab8;
-    border-radius: 12px;
-    padding: 22px 14px; text-align: center; width: 100%;
-    box-shadow: 0 0 30px rgba(74,122,184,0.15), inset 0 1px 0 rgba(255,255,255,0.1);
-    transition: box-shadow 0.3s ease, transform 0.2s ease;
-  }
-  .b-brain.thinking {
-    box-shadow: 0 0 40px rgba(255,207,92,0.5), inset 0 1px 0 rgba(255,255,255,0.15);
-    animation: brainPulse 0.6s ease infinite alternate;
-  }
-  @keyframes brainPulse { from { transform: scale(1); } to { transform: scale(1.03); } }
-  .b-brain .b-brain-icon { font-size: 36px; line-height: 1; margin-bottom: 6px; }
-  .b-brain .b-brain-label { font-family: var(--display); font-size: 18px; font-weight: 600; color: #fff; margin-bottom: 4px; }
-  .b-brain .b-brain-sub { font-family: var(--mono); font-size: 10px; color: #b8d0ea; letter-spacing: 0.06em; }
-
-  .b-slot {
-    background: #232830; border: 1.5px dashed #3a414c; border-radius: 7px;
-    padding: 12px 14px; min-height: 56px;
-    display: flex; align-items: center; gap: 10px;
-    cursor: pointer; transition: all 0.15s ease;
-    font-family: var(--mono); font-size: 11px; color: #6a7280;
-    position: relative;
-  }
-  .b-slot:hover { border-color: #6a7280; color: #a0a8b0; }
-  .b-slot.target {
-    border-color: #ff7a52;
-    box-shadow: 0 0 0 2px rgba(255,122,82,0.15);
-    color: #ff7a52;
-    animation: slotpulse 1.4s ease infinite;
-  }
-  @keyframes slotpulse { 50% { box-shadow: 0 0 0 6px rgba(255,122,82,0.05); } }
-  .b-slot.filled {
-    background: var(--paper); border-style: solid; border-color: #2a2e36;
-    color: var(--ink); cursor: default; padding: 10px 12px;
-    box-shadow: 0 2px 0 rgba(0,0,0,0.25);
-  }
-  .b-slot.filled.gated { border-left: 3px solid var(--gold); }
-  .b-slot.filled.always-esc { border-left: 3px solid var(--accent); }
-  .b-slot.firing { box-shadow: 0 0 0 3px rgba(255,207,92,0.55); background: #fff8e6; }
-  .b-slot.acting { box-shadow: 0 0 0 3px rgba(111,207,111,0.55); background: #eaf6e6; }
-  .b-slot .b-icon { font-size: 22px; line-height: 1; flex-shrink: 0; }
-  .b-slot .b-meta { flex: 1; min-width: 0; }
-  .b-slot .b-name {
-    font-family: var(--body); font-size: 13px; font-weight: 600;
-    color: var(--ink); line-height: 1.2; margin-bottom: 2px;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .b-slot .b-sub { font-family: var(--mono); font-size: 9.5px; color: var(--faint); letter-spacing: 0.02em; }
-  .b-slot .b-x {
-    position: absolute; top: 4px; right: 6px;
-    width: 18px; height: 18px; border-radius: 50%;
-    background: rgba(0,0,0,0.08); color: var(--ink-soft);
-    font-size: 12px; line-height: 1;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; opacity: 0;
-    transition: opacity 0.15s ease, background 0.15s ease;
-  }
-  .b-slot.filled:hover .b-x { opacity: 1; }
-  .b-slot .b-x:hover { background: var(--accent); color: #fff; }
-  .b-slot .b-empty-plus { font-size: 16px; opacity: 0.6; }
-  .b-slot .b-empty-label { font-family: var(--mono); font-size: 11px; opacity: 0.75; }
-
-  .wires { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
-  .wires path {
-    stroke: #4a7ab8; stroke-width: 1.5; fill: none; opacity: 0.5;
-    transition: opacity 0.25s ease, stroke 0.25s ease, stroke-width 0.25s ease;
-  }
-  .wires path.live { stroke: #ffcf5c; opacity: 1; stroke-width: 2.5; }
-  .wires path.gated-wire { stroke-dasharray: 4 4; stroke: var(--gold); }
-  .wires .packet { fill: #ffcf5c; filter: drop-shadow(0 0 5px #ffcf5c); }
-
-  .b-readout {
-    background: #0c1014; border-top: 1px solid #2a2e36;
-    padding: 14px 18px;
-    font-family: var(--mono); font-size: 12.5px; color: #b8c0c8;
-    line-height: 1.55; min-height: 82px;
-    display: flex; flex-direction: column; gap: 4px;
-    max-height: 200px; overflow-y: auto;
-  }
-  .b-readout::-webkit-scrollbar { width: 6px; }
-  .b-readout::-webkit-scrollbar-thumb { background: #2a2e36; border-radius: 3px; }
-  .b-readout .ro-line {
-    display: flex; gap: 10px; align-items: baseline;
-    animation: rowIn 0.3s ease;
-  }
-  @keyframes rowIn { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
-  .b-readout .ro-tag {
-    font-size: 9.5px; letter-spacing: 0.14em; font-weight: 600;
-    padding: 2px 7px; border-radius: 3px; flex-shrink: 0;
-    align-self: flex-start; margin-top: 2px;
-  }
-  .b-readout .ro-tag.trig { background: rgba(255,207,92,0.18); color: #ffcf5c; }
-  .b-readout .ro-tag.brain { background: rgba(74,122,184,0.22); color: #8ab8e8; }
-  .b-readout .ro-tag.act { background: rgba(111,207,111,0.18); color: #9cdf9c; }
-  .b-readout .ro-tag.gate { background: rgba(176,132,40,0.22); color: #e8c878; }
-  .b-readout .ro-tag.miss { background: rgba(255,122,82,0.18); color: #ff9a72; }
-  .b-readout .ro-body { color: #d8dce0; flex: 1; }
-  .b-readout .ro-body b { color: #fff; font-weight: 600; }
-  .b-readout .ro-idle { font-style: italic; color: #6a7280; padding: 6px 0; }
-
-  .palette { background: #0c1014; border-top: 1px solid #2a2e36; padding: 14px 18px 18px; }
-  .palette-head {
-    display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
-    flex-wrap: wrap; gap: 10px;
-  }
-  .palette-title {
-    font-family: var(--mono); font-size: 10.5px;
-    letter-spacing: 0.14em; text-transform: uppercase; color: #8a8475;
-  }
-  .palette-title b { color: #ff7a52; font-weight: 600; text-transform: none; letter-spacing: 0.02em; font-family: var(--body); font-size: 11.5px; }
-  .palette-tabs { display: flex; gap: 6px; }
-  .palette-tab {
-    background: transparent; color: #8a8475;
-    border: 1px solid #2a2e36;
-    font-family: var(--mono); font-size: 10.5px; font-weight: 600;
-    letter-spacing: 0.06em; text-transform: uppercase;
-    padding: 5px 12px; border-radius: 4px; cursor: pointer;
-    transition: all 0.15s ease;
-  }
-  .palette-tab:hover { color: #e8e4d8; border-color: #4a4f56; }
-  .palette-tab.active { background: #ff7a52; color: #0c1014; border-color: #ff7a52; }
-  .palette-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 8px; max-height: 240px; overflow-y: auto; padding: 2px;
-  }
-  .palette-grid::-webkit-scrollbar { width: 6px; }
-  .palette-grid::-webkit-scrollbar-thumb { background: #2a2e36; border-radius: 3px; }
-  .pal-item {
-    background: #1c2128; border: 1px solid #2a2e36; border-radius: 6px;
-    padding: 8px 10px; cursor: pointer;
-    display: flex; gap: 9px; align-items: center;
-    transition: all 0.12s ease; text-align: left;
-  }
-  .pal-item:hover { border-color: #ff7a52; background: #232830; transform: translateY(-1px); }
-  .pal-item.placed { opacity: 0.35; cursor: default; }
-  .pal-item.placed:hover { transform: none; border-color: #2a2e36; background: #1c2128; }
-  .pal-item .p-icon { font-size: 20px; line-height: 1; flex-shrink: 0; }
-  .pal-item .p-meta { flex: 1; min-width: 0; }
-  .pal-item .p-name { font-family: var(--body); font-size: 12.5px; font-weight: 500; color: #e8e4d8; line-height: 1.2; margin-bottom: 2px; }
-  .pal-item .p-sub { font-family: var(--mono); font-size: 9.5px; color: #6a7280; letter-spacing: 0.04em; }
-
-  @media (max-width: 720px) {
-    .builder-canvas { grid-template-columns: 1fr; gap: 18px; min-height: 0; }
-    .b-col.brain-col { order: 1; }
-    .b-col.triggers-col { order: 0; }
-    .b-col.tools-col { order: 2; }
-    .wires { display: none; }
-  }
 </style>
 </head>
 <body>
@@ -929,7 +629,7 @@
       <span>A working note</span>
     </div>
     <h1 class="title">You're not asking it<br>to do a thing.<br>You <em>hired</em> it.</h1>
-    <p class="standfirst">Most people can't tell an "agent" apart from a clever request to a chatbot. The line is real, and it's not about how many steps something takes. It's about who's holding the steering wheel — and whether anyone's even in the car.</p>
+    <p class="standfirst">Most people can't tell an "agent" apart from a clever request to a chatbot. There's a genuine line between them — and it isn't about how many steps something takes. It's about who's holding the steering wheel — and whether anyone's even in the car. By the end, we'll hire one for a real job: handing out GitHub repo access.</p>
   </div>
 </header>
 
@@ -939,7 +639,7 @@
   <section class="reveal">
     <span class="secnum">§ 01 — The confusion worth clearing up</span>
     <h2>"Summarize this" is not an agent.</h2>
-    <p>Ask a chatbot to summarize an email thread and it reads, writes, done. One call. No decisions, no tools, nobody to manage. That's a <strong>task</strong>. It's useful — most of what we do with these models is tasks — but it's a vending machine. Coin in, snack out.</p>
+    <p>Ask a chatbot to summarize an email thread and it reads, writes, done. One call. There was no judgment involved and nobody to manage. That's a <strong>task</strong>. It's useful — most of what we do with these models is tasks — but it's a vending machine. Coin in, snack out.</p>
     <p>The word "agent" gets thrown at anything that takes more than one step, which is where the muddle starts. Multi-step isn't the dividing line. A recipe has many steps and isn't an agent. The real axis is <strong>how much judgment lives between the trigger and the action</strong>, and crucially, <em class="it">who pulls the trigger.</em></p>
 
     <div class="spectrum">
@@ -960,12 +660,66 @@
     <p>That third row is the leap. The thing that makes it <em class="it">feel</em> like an agent isn't the loop — it's that no human typed a prompt to start it. It has a job, and it shows up to do it.</p>
   </section>
 
-  <!-- ============ 1.25 THE VENDING MACHINE ============ -->
+  <!-- ============ 2. FEEL IT — TWO MACHINES ============ -->
   <section class="reveal">
-    <span class="secnum">§ 01¼ — Feel the difference</span>
-    <h2>The same machine, three ways.</h2>
-    <p>A vending machine is the cleanest picture of the whole spectrum, because you can <em>watch</em> the wheel change hands. Climb the levels. At each one, notice how much <strong>you</strong> do versus how much the <strong>machine</strong> does — and who decides to start.</p>
+    <span class="secnum">§ 02 — Feel the difference</span>
+    <h2>Same machine, more autonomy.</h2>
+    <p>Theory later — first, feel where the wheel changes hands. Both toys make the same point: at every level, watch how much <strong>you</strong> do, how much the <strong>machine</strong> does, and above all <em>who decides to start</em>.</p>
+    <div class="gametabs" id="gametabs">
+      <button class="gtab active" data-pane="pane-drv">🚗 Drive it — six levels</button>
+      <button class="gtab" data-pane="pane-vend">🥤 Vend it — three levels</button>
+    </div>
+    <div class="gpane" id="pane-drv">
+      <p class="gpane-lead">The errand never changes: <strong>go get the ice cream 🍦.</strong> What changes is how much of the trip is yours. Each level crashes in its own characteristic way — the crashes are the curriculum.</p>
+    <div class="drv-wrap">
+      <div class="drv-levels" id="drvlevels"></div>
+      <div class="drv-scene" id="drvscene">
+        <div class="drv-hud">
+          <span id="drv-status">PARKED</span>
+          <div class="drv-trip"><div id="drv-tripbar"></div></div>
+        </div>
+        <div class="drv-road" id="drvroad">
+          <div class="drv-dash paused" id="drvdash"></div>
+          <div class="drv-car" id="drvcar">🚗</div>
+          <div class="drv-crash" id="drvcrash">💥</div>
 
+          <!-- floating in-play HUD -->
+          <div class="drv-actions" id="drvactions"></div>
+          <div class="drv-pad" id="drvpad">
+            <div class="pad-group steer" id="pad-steer">
+              <span class="pad-tag" id="tag-steer">YOU</span>
+              <button class="pad-btn" id="pad-up">▲</button>
+              <button class="pad-btn" id="pad-down">▼</button>
+            </div>
+            <div class="pad-group pedals" id="pad-pedals">
+              <span class="pad-tag" id="tag-pedal">YOU</span>
+              <button class="pad-btn" id="pad-brake">🛑<small>BRAKE</small></button>
+              <button class="pad-btn" id="pad-gas">⛽<small>GAS</small></button>
+            </div>
+          </div>
+
+          <!-- takeover alert (centered) -->
+          <div class="drv-alert" id="drvalert">
+            <div class="a-card">
+              <div class="a-title">⚠ Takeover request — hazard ahead</div>
+              <div class="a-count" id="drv-count">3.0s</div>
+              <button class="drv-btn" id="drv-grab">🙌 GRAB THE WHEEL</button>
+            </div>
+          </div>
+
+          <!-- start / verdict overlay (bottom banner) -->
+          <div class="drv-overlay" id="drvoverlay">
+            <div class="drv-card">
+              <div class="dc-text" id="drvnote"></div>
+              <div class="dc-btns" id="drvcardbtns"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+    <div class="gpane" id="pane-vend" hidden>
+      <p class="gpane-lead">Coin in, drink out — then watch the machine take over first the <em>choosing</em>, then the <em>starting</em>. Beat each level to unlock the next.</p>
     <div class="vend-wrap">
       <div class="vend-levels" id="vlevels">
         <div class="vlevel active" data-lvl="1"><b>Level 1 · Task</b><span>you do everything</span></div>
@@ -1003,47 +757,14 @@
         <b>Level 1 — the Task.</b> Insert the coin, pick your drink, collect it. You made every decision. This is "summarize this email": a vending machine — useful, dumb, entirely yours to drive. <span class="who">— like u/Philobus pasting in a message and getting text back. He sends it himself.</span>
       </div>
     </div>
-  </section>
-
-  <!-- ============ 1.5 SENSORS ============ -->
-  <section class="reveal">
-    <span class="secnum">§ 01½ — What it can see</span>
-    <h2>An agent is only as smart as its senses.</h2>
-    <p>That clock in the corner of the LCD wasn't decoration — it's the one and only thing the vending machine can <em>perceive</em>. The model can be brilliant, the loop can be tight, but at level 3 it's reasoning about a single sensor: the time. That's why even the agent version still feels a little thin. It only knows what hour it is.</p>
-
-    <p>Now imagine you bolt on more. Same model. Same loop. Same dispenser. The only thing that changes is what it can look at:</p>
-
-    <div class="spectrum">
-      <div class="srow">
-        <div class="slabel">+ Weather</div>
-        <div class="sbody"><b>95°F outside, AC just kicked off.</b><span>Cold drinks float to the top. A hot day reads differently than the calendar saying "3 PM" — neither sensor on its own gets it right.</span></div>
-      </div>
-      <div class="srow">
-        <div class="slabel">+ Calendar</div>
-        <div class="sbody"><b>Sales call in 90 seconds.</b><span>Suggests something portable, no foam, nothing it'll spend the next minute pouring. The clock alone says "3 PM, fine." The calendar says "you're about to be on camera."</span></div>
-      </div>
-      <div class="srow">
-        <div class="slabel">+ Badge tap</div>
-        <div class="sbody"><b>It's you again — third visit today.</b><span>Recognizes you, remembers the two coffees, doesn't push a third. Personalization isn't a feature, it's a sensor with memory attached.</span></div>
-      </div>
-      <div class="srow">
-        <div class="slabel">+ Inventory</div>
-        <div class="sbody"><b>Iced coffee just ran out.</b><span>Doesn't recommend what it can't dispense. Embarrassingly basic — also the kind of thing that distinguishes a working agent from a demo.</span></div>
-      </div>
     </div>
-
-    <p class="pull">The model thinks. The sensors give it something to think about.</p>
-
-    <p>This generalizes, and it's the half of agent-building everyone underestimates. The AM you'll meet in a few sections has sensors too: renewal dates, account-health scores, news feeds, a people-signal feed for job moves. Same pattern. <em>The clock isn't the only sensor — the clock is just the cheapest one everyone starts with.</em></p>
-
-    <p>So before you ask <em>what should the agent do</em>, ask <strong>what does it need to see</strong>. Half the work of a useful agent lives in that question, and most failed agent demos fail there — not in the reasoning, in the perception.</p>
   </section>
 
   <!-- ============ 1.75 FIELD NOTES + GAME ============ -->
   <section class="reveal">
-    <span class="secnum">§ 01¾ — Field notes from the wild</span>
+    <span class="secnum">§ 03 — Field notes from the wild</span>
     <h2>People genuinely can't tell.</h2>
-    <p>Ask a room full of enthusiastic users what they do with AI <em>agents</em> and almost everyone answers with chatbot use cases — brilliantly used, but chatbots. It's not a dumb mistake. The line is subtle, and people keep catching themselves mid-sentence. Three real ones, lightly edited:</p>
+    <p>Everything in this section is lifted from <strong>a real Reddit thread</strong> — actual comments, usernames intact, from people describing what they do with AI <em>agents</em>. Almost every answer is a chatbot use case: brilliantly used, but a chatbot. It's not a dumb mistake. The line is subtle, and you can watch people catch themselves mid-sentence. Lightly edited:</p>
 
     <div class="mini-quotes">
       <blockquote class="mq">
@@ -1060,7 +781,7 @@
       </blockquote>
     </div>
 
-    <p>So before the theory, a gut check. Here are real things real people said they use AI for. For each one, make the call: is it an <strong>agent</strong> — something that takes action on your behalf, on its own — or just a very good <strong>chatbot</strong> you act on yourself?</p>
+    <p>So before the theory, a gut check — dealt straight from the same thread. Every card below is a real comment from a real person. Make the call: is it an <strong>agent</strong> — something that takes action on your behalf, on its own — or just a very good <strong>chatbot</strong> you act on yourself?</p>
 
     <div class="game" id="game">
       <div class="game-head">
@@ -1076,452 +797,98 @@
       <p class="game-hint" id="hint">Tap a button, or use ← / → arrow keys.</p>
     </div>
 
-    <p style="margin-top:30px;">The split you just felt — most of them are chatbots — is the whole point. Genuinely useful, genuinely not agents. An agent is the rare one that <em>does something in the world without you driving each step</em>. Now the theory will actually stick.</p>
+    <p style="margin-top:30px;">The split you just felt — most of them are chatbots — is the thing this piece is trying to fix. Genuinely useful, genuinely not agents. An agent is the rare one that <em>does something in the world without you driving each step</em>. Now the theory will actually stick.</p>
   </section>
 
   <!-- ============ 2. THE EMPLOYEE FRAME ============ -->
   <section class="reveal">
-    <span class="secnum">§ 02 — The frame that actually works</span>
+    <span class="secnum">§ 04 — The frame that actually works</span>
     <h2>Stop thinking "automation." Think "hiring."</h2>
     <p>The cleanest mental model isn't in any framework doc. It's this: <strong>what would a person you hired do?</strong> A human employee already <em>is</em> a trigger, a loop, tools, memory, and judgment all bundled together — and nobody had to explain any of that to you. So borrow it.</p>
 
     <p class="pull">You don't tell a hire "at 9:00 do X, at 9:05 do Y." You give them a job and they figure out the steps.</p>
 
-    <p>Watch how every piece of the architecture maps onto something obvious about employing a person:</p>
+    <p>So "managed agents" collapses into plain management: <strong>you scoped a job, set what they can do solo versus check with you on, and they tell you what they did.</strong> All the cron-vs-webhook-vs-queue stuff is just "how does this employee know it's time to work." For a person the answer is eyes and a clock — boring plumbing we don't notice because it comes standard. For an agent you have to wire it up, but it's the same boring plumbing.</p>
+
+  </section>
+
+  <!-- ============ 4.5 A REAL PAYROLL ============ -->
+  <section class="reveal">
+    <span class="secnum">§ 04½ — What companies actually hire</span>
+    <h2>A company that runs on agents.</h2>
+    <p>Before we hire our own, look at a real payroll. Vercel <a href="https://vercel.com/blog/introducing-eve">runs more than a hundred agents in production</a> — each one holding down a role in the business. A few from their roster, with the part each one should spark for you:</p>
 
     <div class="lessons">
       <div class="lesson">
-        <h4><span class="lnum">①</span> They have a job, not a script.</h4>
-        <p>"Own the renewals." They work out the steps themselves. That's <em>goal-not-instructions</em> — the prompt defines a role, not a procedure.</p>
+        <span class="teaches">d0 · the data analyst — the permission gate, as architecture</span>
+        <h4>Anyone can ask the warehouse anything.</h4>
+        <p>The most-used internal tool at Vercel, answering 30,000 questions a month in Slack. Every query runs scoped to the asker's own permissions, so it can never show you a table you couldn't already see. The gate isn't in the prompt — it's in the plumbing.</p>
       </div>
       <div class="lesson">
-        <h4><span class="lnum">②</span> They notice things on their own.</h4>
-        <p>They don't sit frozen waiting to be poked. A request lands, they handle it; a slow afternoon, they get ahead. <em>You don't cron a person</em> — they have a calendar and they can see their inbox. The "trigger problem" solves itself when the employee manages their own attention.</p>
+        <span class="teaches">Lead Agent · the SDR — event triggers + self-scheduled follow-ups</span>
+        <h4>It works every lead the moment it lands.</h4>
+        <p>Runs the playbook of their best rep around the clock and follows up on its own, so leads stop going cold overnight. It costs about $5,000 a year to run, returns 32× that, and one engineer maintains it part-time.</p>
       </div>
       <div class="lesson">
-        <h4><span class="lnum">③</span> They escalate.</h4>
-        <p>Routine thing, they just handle it. Weird or expensive thing, they walk over and ask. The permission boundary is literally <em>seniority</em> — a junior checks more, a senior you trust to act.</p>
+        <span class="teaches">Athena · the sales cockpit — non-engineers as the hiring manager</span>
+        <h4>RevOps built it in six weeks, without engineers.</h4>
+        <p>It answers pipeline and forecast questions in plain language by joining Snowflake and Salesforce — the same two-systems move our access agent makes with HR and GitHub. Pipeline coverage nearly doubled after it went live.</p>
       </div>
       <div class="lesson">
-        <h4><span class="lnum">④</span> They report back.</h4>
-        <p>End of day: "handled 12, drafted 3 for your review, flagged one." You're not watching them work. You're getting the summary. That's supervision instead of driving.</p>
-      </div>
-    </div>
-
-    <p>So "managed agents" collapses into something you already know how to think about: <strong>you scoped a job, set what they can do solo versus check with you on, and they tell you what they did.</strong> All the cron-vs-webhook-vs-queue stuff is just "how does this employee know it's time to work." For a person the answer is eyes and a clock — boring plumbing we don't notice because it comes standard. For an agent you have to wire it up, but it's the same boring plumbing.</p>
-
-    <div class="box note">
-      <span class="boxtag">Where the analogy breaks — say this out loud</span>
-      <p>A new human hire is dumb in week one and sharp by month three. An agent is exactly as sharp every time it wakes up — it doesn't learn your accounts unless you <em>build</em> memory in. So it's less "hiring someone" and more <strong>"hiring someone with great instincts and total amnesia, who re-reads the same onboarding doc every morning."</strong> Which tells you something load-bearing: the onboarding doc — the prompt, the examples, the guardrails — <em>is</em> the employee. With a person that doc decays in relevance as they learn. With an agent, it's the whole job.</p>
-    </div>
-  </section>
-
-  <!-- ============ 3. THE WORKED EXAMPLE ============ -->
-  <section class="reveal">
-    <span class="secnum">§ 03 — A worked example, deliberately not customer service</span>
-    <h2>Let's hire an Account Manager.</h2>
-    <p>Customer service is the easy demo — it's reactive, a ticket comes in and you answer it. Boring. A great <strong>Account Manager</strong> is a far better example because the job isn't reactive at all. An AM <em>owns a book of business</em> and works it proactively. They're never surprised and always early. That "always early" is exactly the thing people don't realize is now automatable.</p>
-
-    <p>The mediocre AM processes renewals. The amazing one is running a quiet intelligence operation on every account. So the real thesis here:</p>
-
-    <p class="pull">The leap isn't automating the AM's tasks. It's automating the AM's <em>attention.</em></p>
-
-    <p>The tasks — send the renewal email, route the ticket, grant the discount — are the boring 20%. The 80% that makes a great AM great is <strong>deciding what to pay attention to</strong>: across the whole book, against the open world, over time. A chatbot can't do that. An agent with tools, memory, and its own clock can start to. Here's what a world-class AM actually does, and note how little of it is reactive:</p>
-
-    <h3>They know before you do.</h3>
-    <p>The client raised a Series B → that's an expansion conversation, not a renewal. New regulation hit their industry → proactive outreach. And the dangerous one: <strong>the champion just changed their LinkedIn headline to a new company.</strong> Your internal advocate is leaving — and you also just got a warm lead wherever they landed. One signal, two plays. None of this is in your CRM. It's out in the world.</p>
-
-    <h3>They connect dots across the book.</h3>
-    <p>Three accounts asked about the same missing feature this month → that's not three tickets, it's a product signal. A human juggling 40 accounts struggles to see it. An agent watching all of them at once is <em>structurally</em> good at this — a place it could plausibly beat the human, which is a more interesting claim than "it's as good as a person."</p>
-
-    <h3>They maintain relationships, not transactions.</h3>
-    <p>They schedule regular catch-ups — per <em>person</em>, not per account, because an account doesn't have a LinkedIn but people do. They notice 60 days of silence on a healthy account is <em>itself</em> a risk. They remember the client mentioned a Q3 launch and check in on it. This is where memory and proactivity compound into something a chatbot fundamentally cannot do: hold a relationship over time.</p>
-
-    <h3>They triage the whole book every morning.</h3>
-    <p>Not "is there a ticket" — but "rank my 40 accounts by risk and opportunity today, and tell me where to spend my attention." They walk in knowing the three accounts that need them <em>today</em> and ignore the 37 that are fine. That triage-and-prioritize move is the most senior-employee behavior there is.</p>
-
-    <div class="box warn">
-      <span class="boxtag">Two honest flags, because this is where it gets real</span>
-      <p style="margin-bottom:12px;"><strong>Scraping LinkedIn is against their ToS and they block it hard.</strong> In a real build, "check LinkedIn" means consuming a people-intelligence <em>feed</em> — a CRM enrichment vendor, Clay, a sales-intel provider — not literally scraping. Which source is a swappable detail; the agent pattern is identical. In a toy, you just hand it a faked table of person-events.</p>
-      <p><strong>And there's a privacy line.</strong> A great human AM quietly tracking a named person's job moves is normal and nobody blinks. An automated system doing it at scale <em>reads</em> differently, even when every fact is public. Naming that shows you've thought about where this goes — not just that it's cool.</p>
-    </div>
-  </section>
-
-  <!-- ============ 4. THE THREE LESSONS ============ -->
-  <section class="reveal">
-    <span class="secnum">§ 04 — Three responsibilities, three lessons</span>
-    <h2>The features aren't features. They're the curriculum.</h2>
-    <p>Give the AM three jobs and each one teaches a distinct, load-bearing concept. That's why this example is worth building: it covers the whole surface without feeling like a checklist.</p>
-
-    <div class="lessons">
-      <div class="lesson">
-        <span class="teaches">Teaches → proactive / self-scheduled triggering</span>
-        <h4>Renewals</h4>
-        <p>The showpiece. No human starts it — the agent works backward from renewal dates on its own clock. 90 days out it glances, 60 it checks health, 30 it reaches out. Most accounts on most days, it does nothing. <em>Choosing who and when</em> is the agentic move. This is the thing that makes it an agent and not a chatbot.</p>
+        <span class="teaches">Vertex · the support engineer — the escalation ladder, at scale</span>
+        <h4>It solves 92% of tickets on its own.</h4>
+        <p>Reads each ticket across the help center, docs, and Slack, finds the answer, and responds — then escalates the rest to humans. The support team's attention goes only to the problems that genuinely need it.</p>
       </div>
       <div class="lesson">
-        <span class="teaches">Teaches → classify, route, hook external systems</span>
-        <h4>Support escalation</h4>
-        <p>A ticket lands and the agent decides: answer it, send to eng, jump on a churn risk, or recognize a renewal conversation in disguise — then hooks the right system (open a Linear issue, ping eng in Slack, reply). The webhook fires identically every time; the <em>judgment</em> is the agent. Your event-triggered counterpart to the scheduled renewals.</p>
+        <span class="teaches">draft0 · the content reviewer — copilot level, chosen on purpose</span>
+        <h4>Every draft gets reviewed before a human sees it.</h4>
+        <p>It runs a full review pipeline — catching the glaring issues, building an analysis of what the piece is about — and then hands off. It never publishes. Small pieces move fast; humans keep their attention for the ones that demand it.</p>
       </div>
       <div class="lesson">
-        <span class="teaches">Teaches → permission ladder / what "managed" means</span>
-        <h4>Discounts</h4>
-        <p>The most important one. You'd never let a new AM hand out unlimited discounts. There's a ladder — and that ladder <em>is</em> the permission boundary. Without it, discounts are the scariest thing in the build. With it, they're the whole point.</p>
+        <span class="teaches">V · the router — agents managing agents</span>
+        <h4>The fleet behaves like one employee.</h4>
+        <p>With hundreds of agents, remembering which one handles what became a job of its own — so they gave that job to an agent too. Everything goes to V in Slack first, and V routes the task to whichever agent can actually do it.</p>
       </div>
     </div>
 
-    <p>And catch-ups and people-monitoring aren't two more features bolted on — they're the <strong>people layer</strong> that turns "account manager" into "relationship manager," which is what a great one actually is.</p>
+    <p>One more detail from that post matters for next week. Those agents began as separate projects on separate stacks — each with its own way of holding state, brokering credentials, and emitting logs, "which is where most teams find themselves after their second or third agent." Today they live in one monorepo, built and observed the same way no matter which team owns them. Sharing a shape is what lets a hundred agents run with the conventions of one — and it's why we'll build ours in a framework instead of from scratch.</p>
   </section>
 
-  <!-- ============ 4.5 PARALLEL EXAMPLE: SECURITY ============ -->
+  <!-- ============ 5. THE JOB ============ -->
   <section class="reveal">
-    <span class="secnum">§ 04½ — Same shape, different job</span>
-    <h2>Now hire one more — somewhere weirder.</h2>
-    <p>The AM isn't a special case. The pattern — own a domain, watch your sensors, decide what deserves attention today, act within your authority — runs everywhere. Here's the same shape in a totally different domain, just to prove it isn't AM-flavored.</p>
-
-    <h3>The security-checklist person.</h3>
-    <p>Every company has one — or a team, or a Notion page nobody reads. Their job: make sure every employee follows the security checklist. New hire started Monday? Confirm WARP is installed. Background check submitted but not back yet? Don't grant prod. Annual training due in 7 days? Nudge. Still not done at 0 days? Nudge again, with feeling. Escalating? Loop in their manager.</p>
-
-    <p>Mediocre version of this job: a quarterly spreadsheet someone audits by hand. Great version: a quiet agent watching the whole company, every day, doing nothing on most days. Sound familiar?</p>
-
-    <p>Same three layers from the architecture you're about to see, named for this job:</p>
-
-    <div class="spectrum">
-      <div class="srow">
-        <div class="slabel">Sensors</div>
-        <div class="sbody"><b>What it can perceive.</b><span>HR system → new hires, terminations, role changes · MDM → is WARP running, OS up to date, disk encrypted · background-check API → status of each open check · LMS → who's completed training, who's overdue · Slack → did the nudge get an ack · calendar → is this person on PTO (don't bug them).</span></div>
-      </div>
-      <div class="srow">
-        <div class="slabel">Reasoning</div>
-        <div class="sbody"><b>What it decides.</b><span>Who's out of compliance, by what, and how overdue. Have I already nudged them today (don't be the annoying agent). Is this routine, or has it crossed into "tell their manager." New-hire week is gentle; day 30 with no WARP isn't gentle.</span></div>
-      </div>
-      <div class="srow">
-        <div class="slabel">Actuators</div>
-        <div class="sbody"><b>What it can do.</b><span>Slack DM the employee · email with a how-to link · ping the manager once it crosses the line · open an IT ticket when a check is stuck on someone else · mark complete when the sensor confirms it.</span></div>
-      </div>
-    </div>
-
-    <p>Two agents now — Account Manager and Security Compliance. Two domains, one shape. Renewal date maps to background-check status. People-signal feed maps to MDM. Discount cap maps to "can DM the employee but can't loop in their manager without my approval." Find the job at your company where someone is the human glue keeping a long-running thing on track, list the sensors it'd need, and you've found an agent-shaped hole.</p>
-
-    <div class="box warn">
-      <span class="boxtag">Where the permission ladder gets real</span>
-      <p>"DM Chu about training" — easy, agent acts solo. "Revoke Chu's prod access for non-compliance" — never without a human approving. Security is the domain where the difference between <em>act solo</em> and <em>draft and escalate</em> stops being a design exercise and starts mattering. The ladder isn't paranoia — it's how the agent earns the right to keep its job.</p>
-    </div>
+    <span class="secnum">§ 05 — A real job, from your actual org</span>
+    <h2>Hire an agent to hand out repo access.</h2>
+    <p>Here's a job quietly eating a human's attention at every company: <strong>GitHub access requests.</strong> Someone pings #it-help — "hey, can I get access to <code>analytics</code>?" — and a person plays detective: who is this? what team are they on? who owns that repo? read or write? how sensitive is it? Then they click the buttons and reply. Each one takes a couple of minutes, and they never stop coming.</p>
+    <p>It's the perfect first hire, because the job already contains every organ of an agent: an <strong>event</strong> (a request lands), <strong>lookups</strong> (the org chart, the repo registry), a <strong>judgment call</strong> (policy plus common sense), a <strong>gated action</strong> (a grant changes what someone can touch), and a paper trail. Nothing about it is exotic. All of it is judgment.</p>
+    <p class="pull">Requests in. Decisions out. Most need no human. The risky ones always do.</p>
   </section>
 
-  <!-- ============ 5. ARCHITECTURE ============ -->
+  <!-- ============ 6. BUILD IT ============ -->
   <section class="reveal">
-    <span class="secnum">§ 05 — How it actually hangs together</span>
-    <h2>The architecture.</h2>
-    <p>Strip the romance off and a proactive agent is a <strong>dumb trigger plus a smart body.</strong> The trigger isn't the agent any more than your alarm clock is you — it just wakes the thing up. Here's the shape:</p>
+    <span class="secnum">§ 06 — One request, in slow motion</span>
+    <h2>Walk one request through the machine.</h2>
+    <p>Here's a single access request moving through the agent, one beat at a time. Click through it slowly. Most of the beats are machinery you'll recognize from the toys. One is a decision nobody can make but you.</p>
 
-    <div class="diagram">
-      <svg viewBox="0 0 760 560" xmlns="http://www.w3.org/2000/svg" font-family="Spline Sans Mono, monospace">
-        <defs>
-          <marker id="arr" markerWidth="9" markerHeight="9" refX="7" refY="3.2" orient="auto">
-            <path d="M0,0 L7,3.2 L0,6.4 z" fill="#1a1814"/>
-          </marker>
-          <marker id="arrR" markerWidth="9" markerHeight="9" refX="7" refY="3.2" orient="auto">
-            <path d="M0,0 L7,3.2 L0,6.4 z" fill="#c4451f"/>
-          </marker>
-        </defs>
-        <text x="20" y="30" font-size="12" letter-spacing="2" fill="#c4451f">① TRIGGERS — "the plumbing"</text>
-        <g font-size="13" fill="#1a1814">
-          <rect x="20" y="44" width="180" height="44" rx="4" fill="#ebe6d8" stroke="#1a1814" stroke-width="1.5"/>
-          <text x="34" y="64" font-weight="600">⏰ Clock / cron</text>
-          <text x="34" y="80" font-size="11" fill="#4a463d">"every morning, sweep"</text>
-          <rect x="20" y="98" width="180" height="44" rx="4" fill="#ebe6d8" stroke="#1a1814" stroke-width="1.5"/>
-          <text x="34" y="118" font-weight="600">📨 Webhook / event</text>
-          <text x="34" y="134" font-size="11" fill="#4a463d">"a ticket just arrived"</text>
-          <rect x="20" y="152" width="180" height="44" rx="4" fill="#ebe6d8" stroke="#1a1814" stroke-width="1.5"/>
-          <text x="34" y="172" font-weight="600">🔁 Self-scheduled</text>
-          <text x="34" y="188" font-size="11" fill="#4a463d">"recheck this in 4h"</text>
-        </g>
-        <path d="M200,66 C260,66 270,250 318,272" fill="none" stroke="#1a1814" stroke-width="1.5" marker-end="url(#arr)"/>
-        <path d="M200,120 C270,120 280,260 318,282" fill="none" stroke="#1a1814" stroke-width="1.5" marker-end="url(#arr)"/>
-        <path d="M200,174 C270,200 280,280 318,292" fill="none" stroke="#1a1814" stroke-width="1.5" marker-end="url(#arr)"/>
-        <text x="330" y="200" font-size="12" letter-spacing="2" fill="#2b4a6f">② THE BODY — "the judgment"</text>
-        <rect x="330" y="214" width="220" height="150" rx="6" fill="#fbf9f3" stroke="#2b4a6f" stroke-width="2.5"/>
-        <text x="440" y="244" font-size="15" font-weight="600" fill="#1a1814" text-anchor="middle" font-family="Fraunces, serif">The agent loop</text>
-        <text x="346" y="272" font-size="12" fill="#1a1814">observe state</text>
-        <text x="346" y="294" font-size="12" fill="#1a1814">→ decide if anything matters</text>
-        <text x="346" y="316" font-size="12" fill="#1a1814">→ pick a tool &amp; act</text>
-        <text x="346" y="338" font-size="12" fill="#1a1814">→ check result · repeat</text>
-        <text x="346" y="357" font-size="11" fill="#8a8475" font-style="italic">…until the goal's met (or it escalates)</text>
-        <path d="M440,364 L440,398" fill="none" stroke="#1a1814" stroke-width="1.5" marker-end="url(#arr)"/>
-        <path d="M460,398 L460,372" fill="none" stroke="#1a1814" stroke-width="1.5" marker-end="url(#arr)"/>
-        <rect x="330" y="400" width="220" height="56" rx="6" fill="#f4ead0" stroke="#b08428" stroke-width="2"/>
-        <text x="440" y="424" font-size="13" font-weight="600" fill="#1a1814" text-anchor="middle">🧠 Memory (the onboarding doc</text>
-        <text x="440" y="442" font-size="13" font-weight="600" fill="#1a1814" text-anchor="middle">it re-reads every wake-up)</text>
-        <text x="580" y="30" font-size="12" letter-spacing="2" fill="#3d5e3a">③ TOOLS</text>
-        <g font-size="11.5" fill="#1a1814">
-          <rect x="580" y="44" width="160" height="34" rx="4" fill="#e8efe5" stroke="#3d5e3a" stroke-width="1.5"/>
-          <text x="592" y="65">🔎 web / news search</text>
-          <rect x="580" y="84" width="160" height="34" rx="4" fill="#e8efe5" stroke="#3d5e3a" stroke-width="1.5"/>
-          <text x="592" y="105">👤 people-signal feed</text>
-          <rect x="580" y="124" width="160" height="34" rx="4" fill="#e8efe5" stroke="#3d5e3a" stroke-width="1.5"/>
-          <text x="592" y="145">✉️ send / draft email</text>
-          <rect x="580" y="164" width="160" height="34" rx="4" fill="#e8efe5" stroke="#3d5e3a" stroke-width="1.5"/>
-          <text x="592" y="185">🎫 open eng ticket</text>
-          <rect x="580" y="204" width="160" height="34" rx="4" fill="#e8efe5" stroke="#3d5e3a" stroke-width="1.5"/>
-          <text x="592" y="225">💸 grant discount</text>
-        </g>
-        <path d="M550,272 C566,150 568,120 580,100" fill="none" stroke="#3d5e3a" stroke-width="1.4" marker-end="url(#arr)"/>
-        <path d="M550,290 C566,260 568,240 580,222" fill="none" stroke="#3d5e3a" stroke-width="1.4" marker-end="url(#arr)"/>
-        <text x="330" y="492" font-size="12" letter-spacing="2" fill="#c4451f">④ PERMISSION GATE — "seniority"</text>
-        <rect x="330" y="500" width="410" height="48" rx="6" fill="#fbf9f3" stroke="#c4451f" stroke-width="2"/>
-        <text x="346" y="522" font-size="12" fill="#3d5e3a" font-weight="600">within authority → act solo</text>
-        <text x="346" y="540" font-size="12" fill="#c4451f" font-weight="600">past the line → draft &amp; escalate to a human</text>
-        <path d="M440,456 L440,500" fill="none" stroke="#c4451f" stroke-width="1.5" marker-end="url(#arrR)"/>
-        <text x="20" y="430" font-size="12" letter-spacing="2" fill="#2b4a6f">⑤ THE HUMAN</text>
-        <rect x="20" y="444" width="180" height="104" rx="6" fill="#e6ecf2" stroke="#2b4a6f" stroke-width="2"/>
-        <text x="110" y="472" font-size="14" font-weight="600" fill="#1a1814" text-anchor="middle" font-family="Fraunces, serif">You — supervising</text>
-        <text x="36" y="496" font-size="11.5" fill="#1a1814">· approve escalations</text>
-        <text x="36" y="514" font-size="11.5" fill="#1a1814">· read the EOD report</text>
-        <text x="36" y="532" font-size="11.5" fill="#1a1814">· give feedback → memory</text>
-        <path d="M330,524 C260,524 230,500 200,498" fill="none" stroke="#c4451f" stroke-width="1.5" marker-end="url(#arrR)"/>
-      </svg>
+    <div class="ac">
+      <div class="ac-pipe" id="acpipe"></div>
+      <div class="ac-main">
+        <div class="ac-head">
+          <span id="ac-title">TUE · 9:14 AM</span>
+          <button class="ac-run" id="acnext">▶ Someone needs access</button>
+        </div>
+        <div class="ac-inbox" id="acstage"></div>
+      </div>
+      <div class="ac-note" id="acnote"></div>
     </div>
-    <p class="caption">dumb triggers wake it · the loop decides · tools act · the gate decides solo-vs-escalate · the human supervises &amp; feeds memory</p>
-
-    <h3>The loop, in plain words</h3>
-    <ol class="loop">
-      <li><b>Something wakes it.</b> A clock, an event, or its own previously-set reminder. The least cronjobby version lets the agent set its <em>own</em> next wake-time — "nothing's happening, check back in 4 hours" vs. "this is hot, recheck in 5 minutes." Deciding when to care is itself an agent decision.</li>
-      <li><b>It reads its memory.</b> Per-account and per-person state — last contact, open tickets, sentiment, prior discounts, the relationship history. Without this it has no relationship, and an AM with no memory is just a mail merge.</li>
-      <li><b>It goes and gets fresh signal.</b> Web/news search on the company; the people-signal feed for job moves and promotions. This is the part that reaches into the actual world, not the database.</li>
-      <li><b>It thinks.</b> Fuse account risk with people events — <em>champion-left on a renewal-due account = top of the list</em> — and rank the whole book by where attention should go today.</li>
-      <li><b>It acts — within the gate.</b> Clear-cut and within authority: auto-send the renewal, grant the small discount, route the ticket. Past the line: draft it and escalate.</li>
-      <li><b>It reports back.</b> End-of-day summary of what it did, drafted, and flagged. (Note: that report is itself just a humble cron job — the reactive work is event-driven, the reporting is scheduled. Both, each doing what it's good at.)</li>
-    </ol>
-
-    <h3>The permission ladder, concretely</h3>
-    <p>This is what "managed" means. It's a seniority ladder, and it makes the abstract idea of guardrails completely obvious:</p>
-
-    <div class="ladder">
-      <div class="lr head">
-        <div class="lc">Discount</div>
-        <div class="lc">Situation</div>
-        <div class="lc">Authority</div>
-      </div>
-      <div class="lr">
-        <div class="lc">≤ 10%</div>
-        <div class="lc">Routine retention, healthy account</div>
-        <div class="lc auth-solo">acts solo</div>
-      </div>
-      <div class="lr">
-        <div class="lc">10–20%</div>
-        <div class="lc">At-risk account, bigger ask</div>
-        <div class="lc auth-esc">drafts → you approve</div>
-      </div>
-      <div class="lr">
-        <div class="lc">&gt; 20%</div>
-        <div class="lc">Strategic / unusual terms</div>
-        <div class="lc auth-esc">deal desk / human only</div>
-      </div>
-    </div>
-
-    <h3>The data model is the whole upgrade</h3>
-    <p>Two tables turn "account bot" into "relationship manager":</p>
-    <div class="chips">
-      <span class="chip">accounts: renewal_date</span>
-      <span class="chip">plan · usage_trend</span>
-      <span class="chip">health · discount_history</span>
-      <span class="chip">people: name · role</span>
-      <span class="chip">→ account_id</span>
-      <span class="chip">relationship_strength</span>
-      <span class="chip">last_real_contact · cadence</span>
-      <span class="chip">recent_signals[]</span>
-    </div>
-    <p>An account doesn't have a LinkedIn. People do. The moment people are first-class, both "schedule catch-ups" and "watch for job moves" fall out for free — they're the same move, the agent maintaining a relationship <em>graph</em> instead of an account row.</p>
-  </section>
-
-  <!-- ============ 6. BUILD IT AS A TOY ============ -->
-  <section class="reveal">
-    <span class="secnum">§ 06 — Build it as a toy first</span>
-    <h2>Everything fake, everything inspectable.</h2>
-    <p>For a 101, in-process and observable beats deployed every time. The entire pedagogical value is that you can <em>watch the judgment happen</em>. So:</p>
-    <ol class="loop">
-      <li><b>A <code>now()</code> you control.</b> Advance the clock one day at a time and watch the renewal logic fire. Simulating a date approaching is trivial.</li>
-      <li><b>An accounts table and a people table you can edit by hand.</b> The memory, in plain JSON or a single DB file.</li>
-      <li><b>A stubbed people-signal feed.</b> A little table of events — <code>champion_left</code>, <code>promoted</code>, <code>new_hire</code> — standing in for the LinkedIn/enrichment layer.</li>
-      <li><b>Real web search for company news.</b> This one you don't fake — let it actually go find that a real, public company raised a round, and watch it change its plan. The bit that reaches into the real world lands hardest.</li>
-      <li><b>The LLM does the judgment.</b> The sweep, the scoring, the per-person catch-up drafting.</li>
-      <li><b>Tools are logged stubs.</b> "send email," "open ticket," "grant discount," "escalate" just <em>log what they would do.</em> You read the log and see the decisions.</li>
-    </ol>
-
-    <p>One screen. You press "advance one day" and watch your AM think: account #12 is fine, skip it. Account #7's champion just left and there's a renewal in 90 days — draft a re-engagement play, flag it for you. Account #3 is renewal-due and happy — auto-send the standard renewal. The boring actions become the <em>output</em> of the interesting thinking, instead of being the whole thing.</p>
-
-    <div class="box warn">
-      <span class="boxtag">Keep it honest</span>
-      <p>Real fund-subscription account management is high-stakes, compliance-heavy, LP/GP relationship work. Frame this explicitly as a <strong>toy that teaches the agent pattern</strong> — not a thing you'd point at real clients. That framing is free and it keeps the whole thing clean.</p>
-    </div>
-  </section>
-
-  <!-- ============ 6½. THE TOY ITSELF ============ -->
-  <section class="reveal">
-    <span class="secnum">§ 06½ — The toy, running</span>
-    <h2>Press "advance one day." Watch it stay quiet.</h2>
-    <p>Below is exactly the toy described above, simulated in your browser. Forty accounts, a stubbed people-feed, a fake clock. The "AM" is just deterministic judgment standing in for an LLM — but the <em>pattern</em> is real: it wakes up, looks at everything, decides whether anything deserves attention today, and either acts (within its authority), escalates to you, or — most days — does <em>nothing</em>.</p>
-    <p>Hold "Run 30 days" and watch the action log fill <em>slowly</em>. That gap between how often it works and how rarely it acts is the entire point.</p>
-
-    <div class="toy" id="toy">
-      <div class="toy-top">
-        <div class="toy-date">
-          <small>Today</small>
-          <span id="toy-day-label">Day 1 — Mon, Jun 1</span>
-        </div>
-        <div class="toy-controls">
-          <button class="toy-btn" id="toy-advance">▶ Advance 1 day</button>
-          <button class="toy-btn ghost" id="toy-run30">⏭ Run 30 days</button>
-          <button class="toy-btn ghost" id="toy-reset">↺ Reset</button>
-        </div>
-        <div class="toy-counters">
-          <div class="toy-count"><b id="toy-swept">0</b><span>swept</span></div>
-          <div class="toy-count acted"><b id="toy-acted">0</b><span>acted on</span></div>
-        </div>
-      </div>
-
-      <div class="toy-grid">
-        <div class="toy-pane book">
-          <div class="pane-head">
-            <span>The Book — 40 accounts</span>
-            <span class="ph-sub" id="toy-book-sub">○ idle · ● scanning · ● flagged today</span>
-          </div>
-          <div class="book-list" id="toy-book"></div>
-        </div>
-        <div class="toy-pane">
-          <div class="pane-head">
-            <span>Today's Diary</span>
-            <span class="ph-sub">what the AM thought</span>
-          </div>
-          <div class="diary" id="toy-diary">
-            <div class="diary-empty">Press <b>Advance 1 day</b> to start the AM's first day.</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="toy-log">
-        <div class="log-head">
-          <span>Action Log — what it actually did</span>
-          <span class="ph-sub" style="font-family:var(--body); font-size:11px; color:var(--ink-soft); text-transform:none; letter-spacing:0;" id="toy-log-sub">empty — most days it does nothing</span>
-        </div>
-        <div class="log-rows" id="toy-log">
-          <div class="log-empty">No actions yet. The AM is on the clock.</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="toy-narration" id="toy-narration">
-      <b>The AM is on the clock.</b> It runs a daily sweep across the whole book — 40 accounts — and looks at three things for each: renewal proximity, account health, and any fresh people-signals (a champion leaving, a promotion, a job change). Hit advance and watch what gets surfaced. Most days, almost nothing.
-      <span class="who">— scheduled trigger · fake LLM · stub tools · all in your browser</span>
-    </div>
-
-    <div class="box" style="margin-top: 30px;">
-      <span class="boxtag">The moment that sells it</span>
-      <p>Run 30 days. Notice: 1,200 account-checks, maybe 8 actions, maybe 2 escalations. That gap — between how often it woke up and how rarely it acted — is the entire difference between an agent and a chatbot, made visible. A chatbot does 100% of the work it's asked. An agent decides how much work even needs doing. That's the "oh, <em>that's</em> where this goes" beat.</p>
-    </div>
-
-    <!-- escalation modal -->
-    <div class="esc-modal" id="esc-modal">
-      <div class="esc-card">
-        <div class="esc-head">
-          <span>⚠ Escalation — needs your sign-off</span>
-          <span id="esc-day-label" style="font-size:10px; opacity:0.85;">Day —</span>
-        </div>
-        <div class="esc-body">
-          <h4 id="esc-title">—</h4>
-          <div class="esc-sub" id="esc-sub">—</div>
-          <div class="esc-why" id="esc-why">—</div>
-          <div class="esc-draft" id="esc-draft"><b>Drafted by AM</b>—</div>
-        </div>
-        <div class="esc-foot">
-          <button class="btn-reject" id="esc-reject">Reject</button>
-          <button class="btn-approve" id="esc-approve">Approve &amp; send</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ 6¾. THE BUILDER (lean n8n) ============ -->
-  <section class="reveal">
-    <span class="secnum">§ 06¾ — Wire it yourself</span>
-    <h2>Same brain. Your wiring.</h2>
-    <p>The toy above showed what a wired-up AM agent <em>does.</em> This shows you what the wiring <em>is.</em> Click an empty slot, pick something from the palette. Wires draw themselves. Hit <strong>▶ Run a tick</strong> and watch a real event flow through the graph you built.</p>
-
-    <p>Most agent tutorials lead with <code>cron</code> and <code>webhook</code> and the whole thing feels like plumbing. It's not. <strong>A trigger is anything that changes in the world.</strong> A wearable. A door sensor. An energy price. A champion's job title on LinkedIn. The palette below is a buffet — most options have nothing to do with account management, on purpose. Same brain, swap the trigger, completely different employee.</p>
-
-    <div class="builder" id="builder">
-      <div class="builder-top">
-        <span class="builder-title"><span class="dot"></span>Agent Builder · live</span>
-        <div class="builder-ctrl">
-          <button class="b-btn primary" id="bb-run">▶ Run a tick</button>
-          <button class="b-btn" id="bb-am">📒 Load AM preset</button>
-          <button class="b-btn" id="bb-self">🧍 Personal preset</button>
-          <button class="b-btn" id="bb-clear">↺ Clear</button>
-        </div>
-      </div>
-
-      <div class="builder-canvas" id="b-canvas">
-        <svg class="wires" id="b-wires"></svg>
-
-        <div class="b-col triggers-col">
-          <div class="b-col-head">🔔 Triggers — what wakes it up</div>
-          <div class="b-slot" data-slot="t1" data-kind="trigger"></div>
-          <div class="b-slot" data-slot="t2" data-kind="trigger"></div>
-          <div class="b-slot" data-slot="t3" data-kind="trigger"></div>
-        </div>
-
-        <div class="b-col brain-col">
-          <div class="b-brain" id="b-brain">
-            <div class="b-brain-icon">🧠</div>
-            <div class="b-brain-label">The Brain</div>
-            <div class="b-brain-sub">decides what to do</div>
-          </div>
-        </div>
-
-        <div class="b-col tools-col">
-          <div class="b-col-head">🛠 Tools — what it can do</div>
-          <div class="b-slot" data-slot="x1" data-kind="tool"></div>
-          <div class="b-slot" data-slot="x2" data-kind="tool"></div>
-          <div class="b-slot" data-slot="x3" data-kind="tool"></div>
-          <div class="b-slot" data-slot="x4" data-kind="tool"></div>
-          <div class="b-slot" data-slot="x5" data-kind="tool"></div>
-        </div>
-      </div>
-
-      <div class="b-readout" id="b-readout">
-        <div class="ro-line ro-idle">click an empty slot, then pick something from the palette below — or load a preset and hit ▶</div>
-      </div>
-
-      <div class="palette">
-        <div class="palette-head">
-          <span class="palette-title">Palette — <b id="b-palette-hint">click a slot first ↑</b></span>
-          <div class="palette-tabs">
-            <button class="palette-tab active" data-cat="trigger">🔔 Triggers · 16</button>
-            <button class="palette-tab" data-cat="tool">🛠 Tools · 14</button>
-          </div>
-        </div>
-        <div class="palette-grid" id="b-palette"></div>
-      </div>
-    </div>
-
-    <div class="box note" style="margin-top:20px;">
-      <span class="boxtag">Try this</span>
-      <p style="margin-bottom:10px;">Hit <b>↺ Clear</b>, then build an <strong>Anniversary Agent</strong>: drop "<i>7 days before anniversary</i>" in a trigger slot, "<i>Place an order</i>" and "<i>Send email</i>" in tool slots. Hit ▶. Same brain. Totally different employee — and notice "Place an order" lights up <span style="color:var(--gold); font-weight:600;">gold</span> because it's a gated tool. Above the spend threshold it'll draft instead of just charging your card.</p>
-      <p>Or try wiring an <strong>HRV+Sleep Wellness Agent</strong> with just two triggers (<i>sleep score &lt; 60</i>, <i>HRV spike</i>) and one tool (<i>push you a reminder</i>). Run it five times. Same brain reads the signals differently and writes different reminders — the judgment lives in the brain, not in your wiring.</p>
-    </div>
-
-    <p style="margin-top:24px;">The leap from this toy to real code is small. Each node maps to a real construct: triggers are functions registered with a scheduler or webhook handler, tools are function definitions handed to the LLM, the gate is a permission check before the tool fires. In a real implementation each card would have a second tab — <code>Behavior | Code</code> — showing the actual snippet: <code>cron('0 9 * * *', () =&gt; agent.run())</code> on the trigger, <code>tools.sendEmail({to, subject, body})</code> on the tool. The wiring you just did <em>is</em> the architecture. Wrap each node in real code and you have the agent.</p>
   </section>
 
   <!-- ============ 7. TAKEAWAY ============ -->
   <section class="reveal">
     <span class="secnum">§ 07 — The one thing to remember</span>
-    <h2>It's an employee you onboard with a prompt.</h2>
-    <p>A task is a vending machine. An agent is a hire: you scope its job, set what it can do alone versus escalate, give it memory so it holds a relationship over time, let it manage its own attention — and it reports back. The interesting design questions aren't technical (cron? webhook? queue?). They're <strong>management</strong> questions: how much do you trust it unsupervised, where's the line it has to ask, what does the end-of-day report look like, how does your feedback make it better next week.</p>
-    <p>You already know how to think about those. You've managed people.</p>
-    <p class="pull">The trigger is plumbing. The agent is the judgment between trigger and action — and the most advanced version decides, on its own, when to care.</p>
+    <h2>You scoped a job. It works the job.</h2>
+    <p>A task is a vending machine: coin in, answer out. An agent is a hire. This hour you scoped one real job — access requests — and gave the hire eyes (the org chart), a policy (the prompt), hands (the tools), and a paper trail (the log). Then you made the one call that was never technical: <strong>how much autonomy it gets</strong> — drafts-only, solo-with-escalation, or the full queue. Management questions, all the way down: what may it do alone, where must it ask, what does its report look like.</p>
+    <p><strong>Next week:</strong> we build this exact agent for real, in <a href="https://mastra.ai">Mastra</a>. Every block from §06 becomes a concrete artifact — the trigger is a route, the lookups and grants are tools, the policy is the system prompt, the audit log is a table. Bring the mental model; we'll bring the code.</p>
+    <p class="pull">The trigger is plumbing. The agent is the judgment between the doorbell and the button-click.</p>
   </section>
 
 </div>
@@ -1529,8 +896,8 @@
 <footer>
   <div class="wrap">
     <p>MANAGED AGENTS · 101 — a working note</p>
-    <p>Worked example: an Account Manager. Architecture: dumb triggers, a thinking loop, tools, a permission gate, and a human supervising.</p>
-    <p>Build the toy. Press "advance one day." Watch it decide to stay quiet.</p>
+    <p>Worked example: a GitHub repo-access agent. Trigger → eyes → policy → gated hands → audit.</p>
+    <p>Next week: the same agent, built for real, in Mastra.</p>
   </div>
 </footer>
 
@@ -1842,7 +1209,7 @@
       if (pct >= 90) msg = "You can tell the difference. Most people can't.";
       else if (pct >= 65) msg = "Solid instincts — the gray-area ones get everyone.";
       else if (pct >= 40) msg = "Right in the muddle with everyone else. That's the point.";
-      else msg = "Don't sweat it — this is exactly the confusion the whole piece is about.";
+      else msg = "Don't sweat it — this is exactly the confusion this piece is about.";
       const end = document.createElement('div');
       end.className = 'game-end show';
       end.innerHTML = `
@@ -1870,840 +1237,497 @@
   })();
 
   /* =========================================================== */
-  /* ============ THE AM-AGENT TOY (the hard part) ============= */
+  /* ========= DRIVING LEVELS — SAE J3016, playable ============ */
   /* =========================================================== */
   (function(){
     const $ = id => document.getElementById(id);
-    const bookEl = $('toy-book'), diaryEl = $('toy-diary'), logEl = $('toy-log'),
-          dayLabel = $('toy-day-label'), sweptEl = $('toy-swept'), actedEl = $('toy-acted'),
-          logSub = $('toy-log-sub'), bookSub = $('toy-book-sub'),
-          narrationEl = $('toy-narration'),
-          advBtn = $('toy-advance'), run30Btn = $('toy-run30'), resetBtn = $('toy-reset'),
-          escModal = $('esc-modal'), escTitle = $('esc-title'), escSub = $('esc-sub'),
-          escWhy = $('esc-why'), escDraft = $('esc-draft'), escDay = $('esc-day-label'),
-          escApprove = $('esc-approve'), escReject = $('esc-reject');
-    if (!bookEl) return;
+    const levelsEl=$('drvlevels'), scene=$('drvscene'), road=$('drvroad'),
+          carEl=$('drvcar'), dashEl=$('drvdash'), statusEl=$('drv-status'),
+          tripbar=$('drv-tripbar'), controls=$('drvactions'), note=$('drvnote'),
+          padEl=$('drvpad'), overlayEl=$('drvoverlay'), cardBtns=$('drvcardbtns'),
+          cardEl=$('drvoverlay').querySelector('.drv-card'),
+          alertEl=$('drvalert'), countEl=$('drv-count'), grabBtn=$('drv-grab'),
+          crashEl=$('drvcrash');
+    if(!road) return;
 
-    /* ---------- the book of business ---------- */
-    /* 40 accounts. Renewal_day is "days from day 1". Events are scheduled by day. */
-    const PLANS = ['Starter','Pro','Pro','Pro','Ent','Ent'];
-    const HEALTHS = ['good','good','good','good','good','watch','watch','risk'];
-    const NAMES = [
-      'Acme Holdings','Beacon Labs','Cobalt Capital','Drayton Inc','Evergreen Co',
-      'Fountainhead','Greylock Mfg','Halcyon Group','Indigo Works','Junction Bio',
-      'Kestrel AI','Larkspur Foods','Meridian Tech','Northwind LP','Oryx Industries',
-      'Polaris Studio','Quanta Health','Redbird Logistics','Sandhill Energy','Topaz Media',
-      'Umbra Security','Vector Yield','Wexler Group','Xenon Robotics','Yarrow Partners',
-      'Zenith Realty','Anchor Maritime','Brookline Films','Cinder & Co','Dovetail Build',
-      'Echo Pharma','Foxglove Toys','Glasshouse','Hammond Bros','Ironwood Cap',
-      'Jasper & Stone','Kelvin Systems','Loomis Press','Maple Court','Northstar Aero'
-    ];
-    const PEOPLE = [
-      ['Sarah Chen','VP Ops'], ['Marcus Reed','Head of Eng'], ['Priya Nair','COO'],
-      ['Tom Walsh','CFO'], ['Anita Bose','VP Product'], ['Diego Lopez','CTO'],
-      ['Mira Patel','Director'], ['Jordan Kim','Head of Data'], ['Riya Shah','VP Mktg'],
-      ['Sam O\'Neil','Founder']
-    ];
+    const LANE_Y=[52,138], CAR_X=56, TICK=40, PX=9, TRIP_INC=0.5, COUNTDOWN=3000;
+    const NAMES=['Manual','Assist','Partial','Conditional','High','Full'];
+    const SUBS=['you','autocomplete','the chatbot','reactive agent','managed agent','doesn’t exist'];
+    const SHOPS=[{emo:'🍦',name:'Scoops',mi:'0.4 mi'},{emo:'🍨',name:'Sundae’s',mi:'1.1 mi'},{emo:'🧁',name:'Frost',mi:'2.3 mi'}];
+    let l4dest=SHOPS[0];
 
-    /* Deterministic event script — interesting things happen on specific days
-       across 60 days, with most days nothing happens. */
-    const SCRIPT = [
-      // day, accountIdx, kind, payload
-      { day: 3,  acct: 6,  kind: 'champion_left', person: 'Marcus Reed (Head of Eng)' },
-      { day: 5,  acct: 14, kind: 'support_ticket', topic: 'API rate limits', severity: 'medium' },
-      { day: 7,  acct: 22, kind: 'company_news',   headline: 'raised Series B' },
-      { day: 9,  acct: 2,  kind: 'renewal_window', days_left: 30, health: 'good', want_discount: 5 },
-      { day: 11, acct: 18, kind: 'support_ticket', topic: 'webhook failures', severity: 'high' },
-      { day: 13, acct: 6,  kind: 'renewal_re_engage', reason: 'champion left + renewal in 80d' },
-      { day: 16, acct: 31, kind: 'silence', days: 67 },
-      { day: 18, acct: 9,  kind: 'discount_request', pct: 25 },
-      { day: 21, acct: 11, kind: 'renewal_window', days_left: 30, health: 'watch', want_discount: 15 },
-      { day: 23, acct: 27, kind: 'champion_promoted', person: 'Mira Patel → SVP Strategy' },
-      { day: 25, acct: 35, kind: 'support_ticket', topic: 'SSO setup', severity: 'low' },
-      { day: 27, acct: 0,  kind: 'pattern',  feature: 'audit log export', count: 3 },
-      { day: 30, acct: 12, kind: 'renewal_window', days_left: 30, health: 'risk', want_discount: 22 },
-    ];
+    const INTRO={
+      0:`<b>Level 0 — no automation.</b> The pad is all yours: tap ⛽ to build speed (it bleeds off — keep tapping), steer with ▲▼, and 🛑 panic-stops. Every decision is yours; so is every crash. This is work before AI: just you and your own attention. <span class="who">— exhausting is the point. remember the feeling.</span>`,
+      1:`<b>Level 1 — driver assistance.</b> Look at the pad: the pedals just flipped to <b>AUTO</b> — cruise control owns your speed now. The wheel (▲▼) is still yours. This is autocomplete: one variable held for you, the actual driving still yours. <span class="who">— cruise control or lane-keep: one axis, never both.</span>`,
+      2:`<b>Level 2 — partial automation.</b> The whole pad just went <b>AUTO</b> — it steers <em>and</em> holds speed. Your one remaining control: <b>hold</b> 👀 EYES ON ROAD, the entire trip. Try letting go for two seconds. This is "summarize this email" — the machine does the visible work, you own every output. <span class="who">— Autopilot lives here, sold with Level 4 vibes. Mind the gap.</span>`,
+      3:`<b>Level 3 — conditional automation.</b> Nothing on the pad is yours. Read a book — legally! But when it meets something outside its conditions, it throws the wheel back at you and you have 3 seconds to grab it. This is the reactive agent: works alone until it hits its authority line, then escalates. <span class="who">— watch the escalation closely; it's the part you'll reuse.</span>`,
+      4:`<b>Level 4 — high automation.</b> The pad is <b>gone</b> — there's nothing left to hold, and it will never ask for a takeover. You do exactly one thing: <b>tell it where to go.</b> Pick an ice cream shop, then ride along while it handles the entire errand itself. <span class="who">— you set the goal, it does the rest. Waymo in Phoenix: you name the drop-off, it drives.</span>`,
+      5:`<b>Level 5 — full automation.</b> Forget the wheel — at this level even the <em>trip</em> disappears. You don't ride along anymore. There's just a button that says what you want. <span class="who">— press it.</span>`
+    };
+    const L5_DONE=`<b>Level 5 — the errand disappears.</b> You didn't drive to the ice cream; it came to you. At the top of the ladder the machine stops walking you through the task and just delivers the <em>outcome</em>. For cars it doesn't exist and isn't close — anyone selling anywhere-anything Level 5 is selling a keynote. But one level down, inside an honest fence, that's already what a managed agent does: you don't hand out repo access all week, the Friday digest just shows up. <span class="who">— draw the fence, get the ice cream.</span>`;
+    const DONE={
+      0:`<b>Clean trip — all you.</b> Notice what it cost: your whole attention, both hands, the entire time. Every level from here deletes a piece of that effort. The question each time: which piece, and who's responsible for the rest. <span class="who">— now try Level 1 ↑</span>`,
+      1:`<b>One variable delegated.</b> You stopped thinking about speed entirely — and steered better for it. That's all assistance is: attention freed, zero judgment transferred. The machine held a number; you drove. <span class="who">— next: Level 2 ↑</span>`,
+      2:`<b>You never let go, so it never crashed.</b> Also: your finger is tired. That's Level 2's dirty secret — supervising automation that looks flawless wears you out, so humans quietly stop doing it. Then the one weird thing appears. <span class="who">— next: Level 3 ↑</span>`,
+      3:`<b>Takeover handled. You read a book the rest of the way.</b> Notice what the design demanded: the car knew <em>early</em> that it was out of its depth, and you were reachable when it asked. Both of those are architecture, not luck — in agent terms: escalate with notice, and have a human on call. <span class="who">— next: Level 4 ↑</span>`,
+      4:`<b>You named the goal; it did everything else.</b> It ran the errand without once asking for the wheel — that's the jump from Level 3. You pointed at a destination, and everything after that was its problem. This is the managed agent: you set the job, it works it. <span class="who">— next: Level 5 ↑</span>`
+    };
+    const CRASH={
+      '0':`<b>💥 You crashed it yourself.</b> No automation was involved; there's nobody to blame and nothing to learn about machines. This is the baseline — at Level 0, every failure is a you problem. <span class="who">— try again. tap the gas, watch the road.</span>`,
+      '1':`<b>💥 Cruise control held speed right into it.</b> It did the one thing it does, perfectly, straight into the obstacle. Assistance isn't judgment — autocomplete will finish your sentence into the wrong clause with exactly this confidence. <span class="who">— steering was still your job.</span>`,
+      '2':`<b>💥 You looked away.</b> Level 2 handles the routine flawlessly — which is exactly what trains you to stop watching. Then the one thing it can't handle shows up at 70mph. Shipping unread chatbot output is this crash in slow motion. <span class="who">— supervision was your only job.</span>`,
+      '3-missed':`<b>💥 It asked. Nobody answered.</b> The car knew it was out of its depth and requested a human — that part worked. The human wasn't there. In agent terms: an escalation fired and nobody was on call. If escalation is in your design, "what if nobody answers" is too. <span class="who">— the handoff is the product.</span>`,
+      '3-manual':`<b>💥 You grabbed the wheel and still hit it.</b> Handoffs fail even when they happen — control transfers in seconds, context doesn't. Same reason a mid-task escalation that dumps a wall of text on you gets approved half-read. <span class="who">— design the handoff, not just the alert.</span>`
+    };
 
-    let accounts = [];
-    let people = [];
-    let day = 1;
-    let swept = 0;
-    let acted = 0;
-    let logRows = [];
-    let pendingEscalations = []; // queued so we don't lose them
-    let running = false;
+    let level=-1, token=0;
+    let trip=0, lane=0, spd=0, obstacles=[], spawns=[], takeovers=[], state='parked';
+    let eyes=false, eyesOffAt=0, hazardSpawned=false, warned=false;
+    let deerObj=null, gateObj=null, goalObj=null, countdownEnd=0, fetching=false;
 
-    function dateForDay(d) {
-      const base = new Date(2026, 5, 1); // Jun 1
-      const dt = new Date(base.getTime() + (d-1)*86400000);
-      const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-      const mons = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      return `${days[dt.getDay()]}, ${mons[dt.getMonth()]} ${dt.getDate()}`;
+    NAMES.forEach((nm,i)=>{
+      const d=document.createElement('div');
+      d.className='dlevel unlocked'+(i===0?' active':'');
+      d.dataset.lvl=i;
+      d.innerHTML=`<b>L${i} · ${nm}</b><span class="dsub">${SUBS[i]}</span>`;
+      levelsEl.appendChild(d);
+    });
+    levelsEl.addEventListener('click',e=>{
+      const tab=e.target.closest('.dlevel'); if(!tab) return;
+      const n=+tab.dataset.lvl;
+      enterLevel(n);
+    });
+
+    function setStatus(t){ statusEl.textContent=t; }
+    function showCard(html,tone,buttons){
+      note.innerHTML=html;
+      cardEl.classList.toggle('warn', tone==='warn');
+      cardBtns.innerHTML='';
+      (buttons||[]).forEach(b=>cardBtns.appendChild(b));
+      overlayEl.classList.add('show');
+      padEl.style.display='none'; controls.style.display='none';
+    }
+    function hideCard(){
+      overlayEl.classList.remove('show');
+      padEl.style.display=''; controls.style.display='';
+    }
+    function setLane(n){ lane=n; carEl.style.top=(LANE_Y[n]-24)+'px'; }
+    function clearObs(){ obstacles.forEach(o=>o.el.remove()); obstacles=[]; deerObj=null; gateObj=null; goalObj=null; }
+    function addObs(laneN,emo,x,opts){
+      const el=document.createElement('div');
+      el.className='drv-obs'; el.textContent=emo;
+      if(emo==='🛻') el.style.transform='scaleX(-1)';
+      const ox=(x==null)? road.clientWidth+30 : x;
+      el.style.left=ox+'px'; el.style.top=(LANE_Y[laneN]-22)+'px';
+      road.appendChild(el);
+      const o=Object.assign({el,x:ox,lane:laneN},opts||{});
+      obstacles.push(o); return o;
+    }
+    function btn(label,cls){ const b=document.createElement('button'); b.className='drv-btn'+(cls?' '+cls:''); b.innerHTML=label; return b; }
+    function hint(t){ const s=document.createElement('span'); s.className='drv-hint'; s.innerHTML=t; return s; }
+    function setControls(nodes){ controls.innerHTML=''; nodes.forEach(n=>controls.appendChild(n)); }
+    function holdBtn(label,on,off){
+      const b=btn(label,'hold');
+      b.addEventListener('pointerdown',e=>{ e.preventDefault(); on(); b.classList.add('held'); });
+      ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>{ off(); b.classList.remove('held'); }));
+      return b;
     }
 
-    function seedAccounts() {
-      accounts = NAMES.map((name, i) => {
-        const renewalDay = ((i * 7 + 13) % 220) + 25; // spread across 25-244
-        const health = HEALTHS[i % HEALTHS.length];
-        const plan = PLANS[i % PLANS.length];
-        const champion = PEOPLE[i % PEOPLE.length];
-        return {
-          id: i + 1,
-          name,
-          plan,
-          health,
-          renewalDay,
-          champion: { name: champion[0], role: champion[1] },
-          flags: [],
-          lastSurfaced: null,
-        };
-      });
-      // Wire the script events to specific accounts (overwriting the default flag set on those)
-      SCRIPT.forEach(e => { /* nothing pre-set; we read SCRIPT at simulate-time */ });
+    function spawnsFor(lv){
+      const mk=(at,laneN,e)=>({at,lane:laneN,e:e||'🚧'});
+      if(lv===0) return [mk(8,0),mk(25,1),mk(42,0)];
+      if(lv===1) return [mk(8,0),mk(24,1),mk(40,0,'🛻')];
+      if(lv===2) return [mk(10,0),mk(26,1),mk(42,0,'🛻'),mk(58,1)];
+      if(lv===3) return [mk(12,1)];
+      if(lv===4) return [mk(8,0),mk(22,1,'🛻'),mk(36,0)];
+      return [];
     }
 
-    function renderBook() {
-      bookEl.innerHTML = '';
-      accounts.forEach(a => {
-        const row = document.createElement('div');
-        row.className = 'acct';
-        row.dataset.idx = a.id - 1;
-        const days = a.renewalDay - day;
-        const daysTxt = days <= 0 ? 'overdue!' : days < 1000 ? `${days}d` : '—';
-        const hclass = a.health === 'good' ? 'h-good' : a.health === 'watch' ? 'h-watch' : 'h-risk';
-        row.innerHTML = `
-          <span class="acct-num">#${String(a.id).padStart(2,'0')}</span>
-          <span class="acct-name">${a.name}</span>
-          <span class="acct-meta">
-            <span class="h-dot ${hclass}"></span>
-            <span>${a.plan}</span>
-            <span>·</span>
-            <span>renews ${daysTxt}</span>
-          </span>`;
-        bookEl.appendChild(row);
-      });
-    }
-
-    function diaryLine(cls, text) {
-      if (diaryEl.querySelector('.diary-empty')) diaryEl.innerHTML = '';
-      const ln = document.createElement('div');
-      ln.className = 'diary-line ' + cls;
-      ln.innerHTML = text;
-      diaryEl.appendChild(ln);
-      diaryEl.scrollTop = diaryEl.scrollHeight;
-      return ln;
-    }
-    function dayHeader(d) {
-      diaryLine('dayhead', `── DAY ${d} · ${dateForDay(d)} ──`);
-    }
-    function obsLine(text) { diaryLine('obs', `<span class="t">9:01am</span>${text}`); }
-    function skipLine(name) { diaryLine('skip', `<span class="t">  ·</span>${name} — fine, skip`); }
-    function flagLine(text) { diaryLine('flag', `<span class="t">⚑</span>${text}`); }
-    function actLine(text) { diaryLine('act', `<span class="t">→</span>${text}`); }
-    function escLine(text) { diaryLine('esc', `<span class="t">⚠</span>${text}`); }
-
-    /* ---------- the action log ---------- */
-    function pushLog(kind, day, headline, detail) {
-      logRows.unshift({ kind, day, headline, detail });
-      renderLog();
-      acted++;
-      actedEl.textContent = acted;
-    }
-    function renderLog() {
-      if (logRows.length === 0) {
-        logEl.innerHTML = '<div class="log-empty">No actions yet. The AM is on the clock.</div>';
-        logSub.textContent = 'empty — most days it does nothing';
+    function enterLevel(n){
+      token++; level=n;
+      [...levelsEl.children].forEach(c=>c.classList.toggle('active',+c.dataset.lvl===n));
+      clearObs();
+      crashEl.classList.remove('show'); alertEl.classList.remove('show');
+      dashEl.classList.add('paused');
+      carEl.style.transition=''; carEl.style.left=CAR_X+'px';
+      fetching=false;
+      trip=0; spd=0; tripbar.style.width='0%';
+      eyes=false; hazardSpawned=false; warned=false;
+      state='parked'; setLane(0);
+      spawns=spawnsFor(n);
+      takeovers=(n===3)? [{at:38}] : [];
+      setPad(n<=1?'you':(n>=4?'off':'auto'), n===0?'you':(n>=4?'off':'auto'));
+      if(n===5){ enterL5(); return; }
+      if(n===4){
+        setStatus('WHERE TO?');
+        const picks=[];
+        SHOPS.forEach(s=>{
+          const b=document.createElement('button');
+          b.className='drv-dest';
+          b.innerHTML=`<span class="de-emo">${s.emo}</span>${s.name}<small>${s.mi}</small>`;
+          b.addEventListener('click',()=>{
+            if(state!=='parked') return;
+            l4dest=s;
+            hideCard();
+            setStatus('DISPATCHING TO '+s.name.toUpperCase()+'…');
+            const myTok=token;
+            setTimeout(()=>{ if(token===myTok && state==='parked') startTrip(); },700);
+          });
+          picks.push(b);
+        });
+        showCard(INTRO[4],'ok',picks);
         return;
       }
-      logSub.textContent = `${logRows.length} action${logRows.length===1?'':'s'} over ${day} day${day===1?'':'s'} · ${(acted/Math.max(day,1)*30).toFixed(1)}/mo pace`;
-      logEl.innerHTML = '';
-      logRows.forEach(r => {
-        const row = document.createElement('div');
-        row.className = 'log-row';
-        row.innerHTML = `
-          <span class="l-day">D${r.day}</span>
-          <span class="l-kind ${r.kind}">${labelFor(r.kind)}</span>
-          <span class="l-detail"><b>${r.headline}</b>${r.detail ? `<em>${r.detail}</em>` : ''}</span>`;
-        logEl.appendChild(row);
+      setStatus('PARKED — READY');
+      const s=btn('▶ START TRIP');
+      s.addEventListener('click',startTrip);
+      showCard(INTRO[n],'ok',[s]);
+    }
+
+    function enterL5(){
+      state='done';
+      setStatus('THE CAR IS LISTENING…');
+      markDone(5);
+      const order=btn('🍦 I WANT ICE CREAM');
+      order.addEventListener('click',()=>{
+        if(fetching) return;
+        fetching=true;
+        const myTok=token;
+        hideCard();
+        clearObs();
+        setStatus('FETCHING AT 300 MPH…');
+        dashEl.classList.remove('paused');
+        carEl.style.transition='left 0.7s cubic-bezier(.5,0,1,.5)';
+        carEl.style.left=(road.clientWidth+90)+'px';
+        setTimeout(()=>{
+          if(token!==myTok) return;
+          carEl.style.transition='left 0.6s cubic-bezier(0,.5,.5,1)';
+          carEl.style.left=CAR_X+'px';
+          setTimeout(()=>{
+            if(token!==myTok) return;
+            dashEl.classList.add('paused');
+            const ic=addObs(0,'🍦',CAR_X+56,{goal:true});
+            ic.el.style.top='30px'; ic.el.style.zIndex=6;
+            setStatus('DELIVERED. YOU NEVER LEFT THE DRIVEWAY.');
+            const again=btn('🍦 AGAIN');
+            again.addEventListener('click',()=>{ hideCard(); enterLevel(5); });
+            showCard(L5_DONE,'ok',[again]);
+            fetching=false;
+          },650);
+        },1000);
+      });
+      showCard(INTRO[5],'ok',[order]);
+    }
+
+    function startTrip(){
+      if(state!=='parked') return;
+      hideCard();
+      state='driving';
+      buildRunControls();
+      setStatus(level===0?'STOPPED — TAP ⛽':(level===4?'DRIVING TO '+l4dest.name.toUpperCase():'CRUISING'));
+      runLoop();
+    }
+    function buildRunControls(){
+      const parts=[];
+      if(level===0) parts.push(hint('⛽ tap to keep speed · ▲▼ steer · 🛑 stop'));
+      if(level===1) parts.push(hint('cruise has the pedals — you steer ▲▼'));
+      if(level===2){
+        eyesOffAt=Date.now();
+        parts.push(holdBtn('👀 EYES ON ROAD <small>(hold)</small>',
+          ()=>{ eyes=true; },
+          ()=>{ eyes=false; eyesOffAt=Date.now(); warned=false; }));
+      }
+      if(level===3) parts.push(hint('reading a book 📖 — it’s legal at Level 3'));
+      if(level===4) parts.push(hint('en route to '+l4dest.name+' — just cargo 🛋'));
+      setControls(parts);
+    }
+
+    /* ----- the control pad ----- */
+    const padUp=$('pad-up'), padDown=$('pad-down'), padGas=$('pad-gas'), padBrake=$('pad-brake'),
+          steerGrp=$('pad-steer'), pedalGrp=$('pad-pedals');
+    let steerMode='you', pedalMode='you';
+    function setPad(s,p){
+      steerMode=s; pedalMode=p;
+      [[steerGrp,s,'tag-steer'],[pedalGrp,p,'tag-pedal']].forEach(([g,m,tid])=>{
+        g.classList.toggle('auto', m==='auto');
+        g.classList.toggle('off', m==='off');
+        $(tid).textContent = m==='you' ? 'YOU' : (m==='auto' ? 'AUTO' : '—');
+        g.querySelectorAll('.pad-btn').forEach(b=>b.disabled=(m!=='you'));
       });
     }
-    function labelFor(k) {
-      return { send:'sent', route:'routed', discount:'discount', draft:'drafted', escalate:'escalated', pattern:'pattern' }[k] || k;
+    function steerTo(n){
+      if(steerMode!=='you') return;
+      if(!(state==='driving'||state==='manual')) return;
+      setLane(n);
+    }
+    padUp.addEventListener('click',()=>steerTo(0));
+    padDown.addEventListener('click',()=>steerTo(1));
+    padGas.addEventListener('click',()=>{ if(pedalMode==='you' && state==='driving') spd=Math.min(spd+3.5,PX); });
+    padBrake.addEventListener('click',()=>{ if(pedalMode==='you' && state==='driving') spd=0; });
+    document.addEventListener('keydown',e=>{
+      if(!scene.offsetParent) return;
+      const r=scene.getBoundingClientRect();
+      if(r.bottom<0 || r.top>window.innerHeight) return;
+      if(e.key==='ArrowUp'){ e.preventDefault(); steerTo(0); }
+      if(e.key==='ArrowDown'){ e.preventDefault(); steerTo(1); }
+    });
+    road.addEventListener('click',e=>{
+      if(e.target.closest('.drv-pad, .drv-actions, .drv-overlay, .drv-alert')) return;
+      if(steerMode!=='you') return;
+      if(!(state==='driving'||state==='manual')) return;
+      const r=road.getBoundingClientRect();
+      setLane((e.clientY-r.top) > r.height/2 ? 1 : 0);
+    });
+    grabBtn.addEventListener('click',()=>{
+      if(state!=='takeover') return;
+      state='manual';
+      alertEl.classList.remove('show');
+      setStatus('YOU HAVE THE WHEEL — DODGE');
+      setPad('you','auto');
+      setControls([hint('🦌 in your lane — ▲▼ to dodge')]);
+    });
+
+    function startTakeover(){
+      state='takeover';
+      countdownEnd=Date.now()+COUNTDOWN;
+      const w=road.clientWidth;
+      deerObj=addObs(lane,'🦌', w+30, {deer:true, speed:(w+30-CAR_X)/(COUNTDOWN/TICK), noDodge:true});
+      alertEl.classList.add('show');
+      setStatus('⚠ TAKEOVER REQUESTED');
     }
 
-    /* ---------- visual scan animation on the book ---------- */
-    function flashScan(idx, dur=140) {
-      const row = bookEl.querySelector(`[data-idx="${idx}"]`);
-      if (!row) return;
-      row.classList.add('scan');
-      setTimeout(() => row.classList.remove('scan'), dur);
-    }
-    function flagAccount(idx) {
-      const row = bookEl.querySelector(`[data-idx="${idx}"]`);
-      if (!row) return;
-      row.classList.add('flag');
-      setTimeout(() => row.classList.remove('flag'), 4000);
-    }
+    function runLoop(){
+      token++;
+      const t=token;
+      const step=()=>{
+        if(t!==token) return;
+        const moving = state==='driving'||state==='takeover'||state==='manual';
+        let v=0;
+        if(moving){
+          if(level===0){
+            spd=Math.max(spd-0.05,0); v=spd;
+            if(state==='driving') setStatus(v>5?'DRIVING':(v>0.5?'COASTING — TAP ⛽':'STOPPED — TAP ⛽'));
+          } else v=PX;
+        }
+        dashEl.classList.toggle('paused', v<=0.3);
+        if(v>0){ trip=Math.min(trip+TRIP_INC*(v/PX),100); tripbar.style.width=trip+'%'; }
 
-    /* ---------- run one day ---------- */
-    function runDay(quick=false) {
-      if (running) return;
-      running = true;
-      advBtn.disabled = true; run30Btn.disabled = true;
+        spawns.forEach(s=>{ if(!s.sp && trip>=s.at){ s.sp=true; addObs(s.lane,s.e); } });
+        if(level<=4 && !goalObj && trip>=66){ goalObj=addObs(0,l4dest&&level===4?l4dest.emo:'🍦',null,{goal:true}); goalObj.el.style.top='72px'; }
+        takeovers.forEach(tk=>{ if(!tk.f && trip>=tk.at && state==='driving'){ tk.f=true; startTakeover(); } });
 
-      // clear previous day's diary (keep history? — keep)
-      dayHeader(day);
-      obsLine(`sweep starting · 40 accounts · ${dateForDay(day)}`);
+        obstacles.forEach(o=>{ o.x-=(o.deer? o.speed : v); o.el.style.left=o.x+'px'; });
 
-      const events = SCRIPT.filter(e => e.day === day);
-      const surfacedIdx = new Set(events.map(e => e.acct));
+        if(state==='takeover'){
+          const left=countdownEnd-Date.now();
+          countEl.textContent=(Math.max(left,0)/1000).toFixed(1)+'s';
+          if(left<=0){ crash('3-missed'); return; }
+        }
 
-      // visual sweep
-      const scanDelay = quick ? 3 : 14;
-      const sweepDuration = quick ? 80 : accounts.length * scanDelay + 100;
+        const auto=(level===2 && eyes && state==='driving') || (level===3 && (state==='driving'||state==='takeover')) || (level===4 && state==='driving');
+        if(auto){
+          const threat=obstacles.find(o=>!o.gate && !o.goal && !o.noDodge && o.lane===lane && o.x>CAR_X && o.x-CAR_X<150);
+          const clear=!obstacles.some(o=>!o.gate && !o.goal && o.lane===(1-lane) && Math.abs(o.x-CAR_X)<70);
+          if(threat && clear) setLane(1-lane);
+        }
 
-      accounts.forEach((a, i) => {
-        setTimeout(() => flashScan(i, quick? 30 : 90), i * scanDelay);
-      });
-
-      setTimeout(() => {
-        swept += accounts.length;
-        sweptEl.textContent = swept.toLocaleString();
-
-        obsLine(`swept 40 · ${surfacedIdx.size === 0 ? '0 surfaced — staying quiet' : surfacedIdx.size + ' surfaced for closer look'}`);
-
-        if (surfacedIdx.size === 0) {
-          actLine('Nothing needs me today. <b>Done.</b>');
-          finishDay();
+        const hit=obstacles.find(o=>!o.gate && !o.goal && o.lane===lane && Math.abs(o.x-CAR_X)<32);
+        if(hit){
+          crash(level===3 ? (state==='manual'?'3-manual':'3-missed') : String(level));
           return;
         }
 
-        // process events one by one with little delays
-        let idx = 0;
-        const next = () => {
-          if (idx >= events.length) { finishDay(); return; }
-          const e = events[idx++];
-          processEvent(e);
-          flagAccount(e.acct);
-          setTimeout(next, quick ? 30 : 380);
-        };
-        next();
-      }, sweepDuration);
-    }
+        if(level===2 && state==='driving'){
+          if(!eyes){
+            const off=Date.now()-eyesOffAt;
+            if(off>600 && !warned){ warned=true; setStatus('📱 EYES OFF ROAD…'); }
+            if(off>1400 && !hazardSpawned){ hazardSpawned=true; addObs(lane,'🛻',CAR_X+215); setStatus('📱 STILL TEXTING…'); }
+          } else if(warned){ warned=false; setStatus('CRUISING'); }
+        }
 
-    function processEvent(e) {
-      const a = accounts[e.acct];
-      const tag = `<b>#${String(a.id).padStart(2,'0')} ${a.name}</b>`;
+        if(state==='manual' && deerObj && deerObj.x<CAR_X-46){
+          deerObj=null; state='driving';
+          setPad('auto','auto');
+          setStatus('AUTONOMY RESUMED — BACK TO YOUR BOOK');
+          buildRunControls();
+        }
 
-      switch (e.kind) {
-        case 'champion_left': {
-          flagLine(`${tag}: champion (${e.person}) just changed jobs — and renewal in ${a.renewalDay - day}d`);
-          actLine(`Setting watch · drafting re-engagement script for new contact`);
-          pushLog('draft', day, `Re-engagement plan · ${a.name}`, `Champion ${e.person} left. Renewal in ${a.renewalDay - day}d. Drafted intro to next-likely contact.`);
-          break;
-        }
-        case 'support_ticket': {
-          if (e.severity === 'high') {
-            flagLine(`${tag}: high-severity support ticket — <i>"${e.topic}"</i>`);
-            actLine(`Opening eng ticket + pinging #cs-${e.severity}`);
-            pushLog('route', day, `Routed ticket → eng · ${a.name}`, `"${e.topic}" · severity ${e.severity}. Linear issue opened, Slack pinged.`);
-          } else {
-            flagLine(`${tag}: ${e.severity}-sev ticket — <i>"${e.topic}"</i>`);
-            actLine(`Auto-replied with docs link; queued for CS follow-up`);
-            pushLog('route', day, `Replied to ticket · ${a.name}`, `"${e.topic}" · auto-response sent, queued for human follow-up.`);
-          }
-          break;
-        }
-        case 'company_news': {
-          flagLine(`${tag}: web search hit — <i>"${e.headline}"</i>`);
-          actLine(`Expansion opportunity → drafting outreach to ${a.champion.name}`);
-          pushLog('draft', day, `Expansion outreach · ${a.name}`, `News: ${e.headline}. Drafted note to ${a.champion.name} (${a.champion.role}). Awaiting your sign-off to send.`);
-          break;
-        }
-        case 'renewal_window': {
-          if (e.health === 'good' && e.want_discount <= 10) {
-            flagLine(`${tag}: renewal in ${e.days_left}d · healthy · standard ${e.want_discount}% renewal discount`);
-            actLine(`Within authority — <b>sending renewal email + applying ${e.want_discount}% discount</b>`);
-            pushLog('send', day, `Renewal sent · ${a.name}`, `${e.days_left}d out · healthy · ${e.want_discount}% standard discount applied. Within authority.`);
-            pushLog('discount', day, `${e.want_discount}% applied · ${a.name}`, `Within ≤10% auto-authority. No human needed.`);
-          } else if (e.want_discount <= 20) {
-            flagLine(`${tag}: renewal in ${e.days_left}d · ${e.health} · client asked for ${e.want_discount}% discount`);
-            escLine(`${e.want_discount}% is past my solo authority (10%) — <b>drafting + escalating to you</b>`);
-            queueEscalation({
-              accountId: a.id, name: a.name, day,
-              title: `${e.want_discount}% renewal discount · ${a.name}`,
-              sub: `Renewal in ${e.days_left} days · health: ${e.health} · plan: ${a.plan}`,
-              why: `Past my solo authority (≤10%) but within draft-and-escalate band (10–20%). ${a.name} is ${e.health}. Recommended: approve the ${e.want_discount}% to secure the renewal.`,
-              draft: `Hi ${a.champion.name},\n\nAs your ${e.days_left}-day renewal approaches, we'd like to lock in another year on ${a.plan} with a ${e.want_discount}% loyalty discount in recognition of your continued partnership.\n\nLet me know if a quick call this week works to walk through the terms.\n\nBest,\nAM`,
-              pctLogged: e.want_discount,
-            });
-          } else {
-            flagLine(`${tag}: renewal in ${e.days_left}d · <i>${e.health}</i> · client asked for ${e.want_discount}% discount`);
-            escLine(`${e.want_discount}% &gt; 20% — <b>strategic. Deal desk only. Escalating to you.</b>`);
-            queueEscalation({
-              accountId: a.id, name: a.name, day,
-              title: `${e.want_discount}% renewal discount · ${a.name}`,
-              sub: `Renewal in ${e.days_left} days · health: ${e.health} · plan: ${a.plan}`,
-              why: `> 20% is strategic. I cannot draft this — needs deal desk involvement. Account is ${e.health}; risk of churn is real.`,
-              draft: `(no draft — beyond my authority to compose. Recommend looping in deal desk.)`,
-              pctLogged: e.want_discount,
-            });
-          }
-          break;
-        }
-        case 'renewal_re_engage': {
-          flagLine(`${tag}: connecting two dots — ${e.reason}`);
-          actLine(`Drafting re-engagement for new contact + flagging for your call`);
-          pushLog('draft', day, `Re-engagement · ${a.name}`, `${e.reason}. Suggested play: warm intro through ${a.champion.role} successor.`);
-          break;
-        }
-        case 'silence': {
-          flagLine(`${tag}: no real contact in ${e.days} days — itself a risk signal`);
-          actLine(`Scheduling check-in note · low-pressure`);
-          pushLog('send', day, `Check-in scheduled · ${a.name}`, `${e.days} days of silence on a healthy account. Sent a friendly "anything we can help with?" note.`);
-          break;
-        }
-        case 'discount_request': {
-          flagLine(`${tag}: client requested ${e.pct}% discount mid-cycle`);
-          escLine(`${e.pct}% &gt; 20% — <b>escalating to you, no draft.</b>`);
-          queueEscalation({
-            accountId: a.id, name: a.name, day,
-            title: `${e.pct}% mid-cycle discount · ${a.name}`,
-            sub: `Unplanned request · plan: ${a.plan} · health: ${a.health}`,
-            why: `Past my authority (≤10% solo, ≤20% with draft). > 20% is strategic only. Recommend deal desk.`,
-            draft: `(no draft — strategic terms, deal desk required.)`,
-            pctLogged: e.pct,
-          });
-          break;
-        }
-        case 'champion_promoted': {
-          flagLine(`${tag}: champion event — ${e.person}`);
-          actLine(`Sending congrats note · relationship maintenance`);
-          pushLog('send', day, `Congrats note · ${a.name}`, `${e.person}. Maintains the people layer of the relationship — costs nothing, compounds.`);
-          break;
-        }
-        case 'pattern': {
-          flagLine(`Cross-book pattern: <i>${e.count}</i> accounts asked about <b>${e.feature}</b> this month`);
-          actLine(`Filing product signal · routing to PM`);
-          pushLog('pattern', day, `Product signal · ${e.feature}`, `${e.count} accounts in 30 days asked for ${e.feature}. Routed to PM. Not visible from any single account.`);
-          break;
-        }
-      }
-    }
+        obstacles=obstacles.filter(o=>{ if(o.x<-80){ o.el.remove(); return false; } return true; });
 
-    function finishDay() {
-      day++;
-      dayLabel.textContent = `Day ${day} — ${dateForDay(day)}`;
-      renderBook();
-      renderLog();
-      running = false;
-      advBtn.disabled = false; run30Btn.disabled = false;
-      updateNarration();
-      // surface any queued escalation
-      if (pendingEscalations.length) {
-        setTimeout(showNextEscalation, 380);
-      }
-    }
-
-    function updateNarration() {
-      if (day > 60) {
-        narrationEl.innerHTML = `<b>Two months in.</b> Swept ${swept.toLocaleString()} account-days. Acted on ${acted}. That ratio — ${(acted/swept*100).toFixed(1)}% — is what "managed agent" buys you: someone watching everything, surfacing the ${acted} things that matter. <span class="who">— now imagine the LLM behind it isn't a script — it's making this call live, with reasons.</span>`;
-      } else if (acted >= 6) {
-        narrationEl.innerHTML = `<b>${acted} actions across ${day-1} days.</b> Notice the shape: most are within authority (sent, routed, applied), a few are <em>drafted</em> and waiting on you, the strategic ones got <em>escalated</em>. That ladder is the "managed" part. <span class="who">— the agent earned its keep on the small stuff and asked permission for the big stuff.</span>`;
-      } else if (acted >= 1) {
-        narrationEl.innerHTML = `<b>First surface.</b> Out of ${swept.toLocaleString()} checks, the AM found ${acted} thing${acted===1?'':'s'} worth acting on. Most days it'll do nothing. That restraint is the whole product. <span class="who">— keep going. The pattern shows up around day 15.</span>`;
-      } else {
-        narrationEl.innerHTML = `<b>Day ${day-1} swept. Nothing surfaced.</b> That's the agent working — looking at everything, deciding nothing needs you. A chatbot can't do "nothing." <span class="who">— keep advancing. Interesting things are scheduled for day 3, 7, 11.</span>`;
-      }
-    }
-
-    /* ---------- escalations ---------- */
-    function queueEscalation(esc) {
-      pendingEscalations.push(esc);
-    }
-    let currentEsc = null;
-    function showNextEscalation() {
-      if (currentEsc || pendingEscalations.length === 0) return;
-      currentEsc = pendingEscalations.shift();
-      escTitle.textContent = currentEsc.title;
-      escSub.textContent = currentEsc.sub;
-      escWhy.textContent = currentEsc.why;
-      escDay.textContent = `Day ${currentEsc.day}`;
-      escDraft.innerHTML = `<b>Drafted by AM</b>${currentEsc.draft.replace(/</g,'&lt;')}`;
-      escModal.classList.add('show');
-    }
-    function resolveEsc(approved) {
-      if (!currentEsc) return;
-      const e = currentEsc;
-      escModal.classList.remove('show');
-      if (approved) {
-        pushLog('escalate', e.day, `✓ Approved · ${e.name}`, `You approved: ${e.title}. AM sent it.`);
-      } else {
-        pushLog('escalate', e.day, `✗ Rejected · ${e.name}`, `You rejected: ${e.title}. AM noted, will revisit on next signal.`);
-      }
-      currentEsc = null;
-      setTimeout(showNextEscalation, 250);
-    }
-    escApprove.addEventListener('click', () => resolveEsc(true));
-    escReject.addEventListener('click', () => resolveEsc(false));
-    escModal.addEventListener('click', e => { if (e.target === escModal) resolveEsc(false); });
-
-    /* ---------- controls ---------- */
-    advBtn.addEventListener('click', () => runDay(false));
-    run30Btn.addEventListener('click', () => {
-      if (running) return;
-      let n = 30;
-      const tick = () => {
-        if (n <= 0 || running) return;
-        n--;
-        runDay(true);
-        setTimeout(tick, 180);
+        if(trip>=100 && state==='driving'){ finishTrip(); return; }
+        setTimeout(step,TICK);
       };
-      tick();
-    });
-    resetBtn.addEventListener('click', () => {
-      day = 1; swept = 0; acted = 0; logRows = []; pendingEscalations = []; currentEsc = null;
-      escModal.classList.remove('show');
-      sweptEl.textContent = '0'; actedEl.textContent = '0';
-      dayLabel.textContent = `Day 1 — ${dateForDay(1)}`;
-      diaryEl.innerHTML = '<div class="diary-empty">Press <b>Advance 1 day</b> to start the AM\'s first day.</div>';
-      seedAccounts();
-      renderBook();
-      renderLog();
-      narrationEl.innerHTML = `<b>Reset.</b> The AM is back at day 1. Same book of business, same events ahead. <span class="who">— start the clock again whenever you're ready.</span>`;
-    });
+      step();
+    }
 
-    /* ---------- init ---------- */
-    seedAccounts();
-    renderBook();
-    dayLabel.textContent = `Day 1 — ${dateForDay(1)}`;
+    function crash(reason){
+      token++; state='crashed';
+      dashEl.classList.add('paused');
+      alertEl.classList.remove('show');
+      crashEl.style.left=(CAR_X-6)+'px';
+      crashEl.style.top=(LANE_Y[lane]-32)+'px';
+      crashEl.classList.add('show');
+      scene.classList.add('shake');
+      setTimeout(()=>scene.classList.remove('shake'),450);
+      setStatus('💥 CRASHED');
+      const r=btn('↺ TRY AGAIN');
+      r.addEventListener('click',()=>enterLevel(level));
+      showCard(CRASH[reason],'warn',[r]);
+    }
+    function finishTrip(){
+      token++; state='done';
+      dashEl.classList.add('paused');
+      setStatus('🍦 ICE CREAM ACQUIRED');
+      markDone(level);
+      const a=btn('↺ DRIVE AGAIN');
+      a.addEventListener('click',()=>enterLevel(level));
+      showCard(DONE[level],'ok',[a]);
+    }
+    function markDone(n){
+      const tab=[...levelsEl.children][n];
+      tab.classList.add('done');
+    }
+
+    enterLevel(0);
+  })();
+
+  /* ============ TOY TABS ============ */
+  (function(){
+    const tabs=document.getElementById('gametabs');
+    if(!tabs) return;
+    tabs.addEventListener('click',e=>{
+      const b=e.target.closest('.gtab'); if(!b) return;
+      [...tabs.children].forEach(t=>t.classList.toggle('active',t===b));
+      document.querySelectorAll('.gpane').forEach(p=>{ p.hidden=(p.id!==b.dataset.pane); });
+    });
   })();
 
   /* =========================================================== */
-  /* ============ THE BUILDER (lean n8n-style) ================= */
+  /* ======= ACCESS AGENT — one request, in slow motion ======== */
   /* =========================================================== */
   (function(){
-    const $ = id => document.getElementById(id);
-    const canvas = $('b-canvas'), wires = $('b-wires'), readout = $('b-readout'),
-          palette = $('b-palette'), brain = $('b-brain'),
-          hintEl = $('b-palette-hint');
-    if (!canvas) return;
+    const $=id=>document.getElementById(id);
+    const pipeEl=$('acpipe'), titleEl=$('ac-title'), nextBtn=$('acnext'),
+          stage=$('acstage'), note=$('acnote');
+    if(!pipeEl) return;
 
-    const TRIGGERS = [
-      { id:'cron_morning',   icon:'🌅', name:'Every morning · 9am',           sub:'cron',
-        fires:'Daily sweep starting — anything in the book need me today?' },
-      { id:'webhook_ticket', icon:'🎫', name:'Support ticket arrives',         sub:'webhook',
-        fires:'New ticket from Acme: "API returning 500s on /v2/exports"' },
-      { id:'renewal_90',     icon:'📆', name:'90 days before any renewal',     sub:'time-relative',
-        fires:'Cobalt Capital renews in 90 days — first checkpoint' },
-      { id:'champion_move',  icon:'👤', name:'A champion changes jobs',        sub:'people-feed',
-        fires:'Marcus Reed (Greylock champion, Head of Eng) just joined Stripe' },
-      { id:'company_news',   icon:'📈', name:'Client in the news',             sub:'web signal',
-        fires:'Vector Yield closed a $40M Series B this morning' },
-      { id:'pattern_3',      icon:'🔁', name:'Same request 3+ times this month', sub:'cross-book',
-        fires:'3 different accounts asked about audit log exports in 30 days' },
-      { id:'silence_60',     icon:'🕸', name:'Healthy account silent 60+ days', sub:'absence',
-        fires:'Anchor Maritime — no real contact in 67 days. That itself is a signal.' },
-      { id:'hydration_low',  icon:'🥤', name:'Your hydration drops below 50%', sub:'wearable',
-        fires:"Your hydration: 38% · 2:14pm" },
-      { id:'sleep_bad',      icon:'😴', name:'Sleep score under 60',           sub:'wearable',
-        fires:"Last night's sleep: 51. You're going to feel it around 3pm." },
-      { id:'hrv_spike',      icon:'💔', name:'HRV spike (stress)',             sub:'wearable',
-        fires:'HRV dropped 28% from your 30-day baseline' },
-      { id:'pantry_low',     icon:'🥛', name:'Pantry item below threshold',    sub:'iot · smart fridge',
-        fires:'Milk gauge: 14% remaining. Empty by Friday.' },
-      { id:'door_late',      icon:'🏠', name:'Front door unlocked at 11pm',    sub:'iot · smart lock',
-        fires:'Door state: unlocked · 23:04. Unusual for a Tuesday.' },
-      { id:'price_drop',     icon:'⚡', name:'Energy price < $0.10/kWh',       sub:'market',
-        fires:'Spot price hit $0.08/kWh · home battery at 22%' },
-      { id:'aqi_bad',        icon:'🌫', name:'AQI > 150 in your city',         sub:'environmental',
-        fires:'AQI 178 today — unhealthy for sensitive groups' },
-      { id:'anniversary_7',  icon:'🎁', name:'7 days before anniversary',      sub:'calendar',
-        fires:'Anniversary in 7 days · no dinner booked · no gift purchased' },
-      { id:'self_recheck',   icon:'🔁', name:'Self-scheduled re-check',        sub:'I set my own alarm',
-        fires:"Following up on Beacon Labs — I asked myself to recheck today" },
+    const PIPE=[['⚡','trigger'],['👀','lookups'],['🧠','policy'],['🚦','autonomy'],['📒','audit']];
+    PIPE.forEach((p,i)=>{
+      if(i>0){ const a=document.createElement('span'); a.className='parrow'; a.textContent='→'; pipeEl.appendChild(a); }
+      const b=document.createElement('div');
+      b.className='pblock'; b.innerHTML=`<b>${p[0]}</b>${p[1]}`;
+      pipeEl.appendChild(b);
+    });
+
+    const TITLES=['TUE · 9:14 AM','TUE · 9:14:02 AM','TUE · 9:14:05 AM','TUE · 9:14:09 AM','TUE · 9:14:11 AM','FRI · 4:30 PM'];
+    const BTNS=['▶ Someone needs access','It takes a look →','It thinks →','Now, the real question →','And the paper trail →','↺ Run it again'];
+    const NOTES=[
+      `<b>A single request, start to finish.</b> Most of the beats are machinery you'll recognize from the toys. Beat four is the one that's yours. <span class="who">— click through at your own pace</span>`,
+      `<b>Beat 1 — the doorbell.</b> Nobody prompted anything. A Slack message hit a webhook and the agent woke up — the Level-3 vending machine, remember: no button for you to press. So far it has the message and nothing else. It doesn't even know who Priya is.`,
+      `<b>Beat 2 — it looks.</b> Read-only tools: the org chart, the repo registry — the same tabs a human opens to play detective. These are the car's sensors. It can <em>see</em> everything now. It can still <em>do</em> nothing.`,
+      `<b>Beat 3 — it thinks.</b> The policy is one page of prose you wrote: "team members get read on their team's repos; write goes through owners; admin is never automated." Lookups plus that page equals a decision. Edit the page and tomorrow's decisions change — the page is the employee.`,
+      `<b>Beat 4 — the beat that's yours.</b> The exact same agent can run at any of these levels — no framework decides for you, and "fully autonomous" is not automatically the right answer. It's the driving-levels choice, and it's a management decision wearing a technical costume. <strong>Try all three.</strong>`,
+      `<b>Beat 5 — the record.</b> Every decision writes a line to the log, and the week rolls up into a Friday digest. It's what turns "wait, who gave Jake access?" into a grep instead of a meeting. And it's how autonomy gets <em>earned</em>: run it at Copilot for two weeks, notice you approved 100% of its drafts, then hand it the next level — exactly like a hire. <span class="who">— next week: this agent, built for real, in Mastra</span>`
+    ];
+    const LEVELS=[
+      {n:2,name:'Copilot',line:'it drafts, you click',desc:'Every grant crosses your desk — even the obvious ones.'},
+      {n:3,name:'Conditional',line:'routine solo · weird → you',desc:'Acts within policy; hands you the wheel on anything else.'},
+      {n:4,name:'Autonomous',line:'you named the job',desc:'Runs the whole queue. You read about it on Friday.'}
     ];
 
-    const TOOLS = [
-      { id:'send_email',     icon:'✉️', name:'Send email',                     sub:'solo',                gate:false },
-      { id:'send_slack',     icon:'💬', name:'Send Slack DM',                  sub:'solo',                gate:false },
-      { id:'open_ticket',    icon:'🎫', name:'Open eng ticket (Linear)',       sub:'solo',                gate:false },
-      { id:'web_search',     icon:'🔎', name:'Search the web',                 sub:'read-only',           gate:false },
-      { id:'read_memory',    icon:'📒', name:'Read account memory',            sub:'read-only',           gate:false },
-      { id:'apply_discount', icon:'💸', name:'Apply a discount',               sub:'≤10% solo · >10% gated', gate:'ladder' },
-      { id:'place_order',    icon:'🛒', name:'Place an order',                 sub:'≤$50 solo · >$50 gated', gate:'ladder' },
-      { id:'page_oncall',    icon:'🚨', name:'Page on-call',                   sub:'always escalates',    gate:'always' },
-      { id:'schedule_call',  icon:'📞', name:'Schedule a call',                sub:'solo',                gate:false },
-      { id:'remind_user',    icon:'🔔', name:'Push you a reminder',            sub:'solo',                gate:false },
-      { id:'lock_door',      icon:'🔐', name:'Lock the front door',            sub:'iot · solo',          gate:false },
-      { id:'charge_battery', icon:'🔋', name:'Force-charge the battery',       sub:'iot · solo',          gate:false },
-      { id:'order_supplies', icon:'📦', name:'Reorder supplies',               sub:'≤$100 solo · gated',  gate:'ladder' },
-      { id:'escalate',       icon:'⚠️', name:'Escalate to you',                sub:'human inbox · always asks', gate:false },
-    ];
+    let beat=0, level=null;
 
-    // Brain's tool preference per trigger (first match wins)
-    const PREFS = {
-      cron_morning:   ['read_memory','send_email','remind_user','escalate'],
-      webhook_ticket: ['open_ticket','send_slack','page_oncall','escalate'],
-      renewal_90:     ['send_email','apply_discount','schedule_call','escalate'],
-      champion_move:  ['send_email','schedule_call','send_slack','escalate'],
-      company_news:   ['send_email','schedule_call','remind_user'],
-      pattern_3:      ['open_ticket','send_slack','remind_user'],
-      silence_60:     ['send_email','remind_user','schedule_call'],
-      hydration_low:  ['remind_user','send_slack','order_supplies'],
-      sleep_bad:      ['remind_user','send_slack'],
-      hrv_spike:      ['remind_user','send_slack'],
-      pantry_low:     ['order_supplies','remind_user'],
-      door_late:      ['lock_door','remind_user'],
-      price_drop:     ['charge_battery','remind_user'],
-      aqi_bad:        ['remind_user','send_slack'],
-      anniversary_7:  ['place_order','remind_user','send_email','escalate'],
-      self_recheck:   ['read_memory','send_email','remind_user'],
-    };
-
-    const ACT_VERBS = {
-      send_email:'send an email', send_slack:'ping over Slack',
-      open_ticket:'open an eng ticket', web_search:'search the web for context',
-      read_memory:'pull up account memory', apply_discount:'apply a discount',
-      place_order:'place an order', page_oncall:'page on-call',
-      schedule_call:'schedule a call', remind_user:'push you a reminder',
-      lock_door:'lock the door', charge_battery:'force-charge the battery',
-      order_supplies:'reorder supplies', escalate:'escalate to you',
-    };
-    const WHY = {
-      cron_morning:'so you walk in already knowing what matters',
-      webhook_ticket:'so the right team sees it in minutes, not hours',
-      renewal_90:'to start the renewal motion early, while there\'s slack',
-      champion_move:'before the relationship cools',
-      company_news:'to turn news into an expansion conversation',
-      pattern_3:'because this is a product signal, not three separate tickets',
-      silence_60:'because silence on a healthy account is itself a risk',
-      hydration_low:"so you don't crash this afternoon",
-      sleep_bad:"so today's plan respects last night",
-      hrv_spike:'to nudge a recovery move before it compounds',
-      pantry_low:'before you run out mid-recipe',
-      door_late:"because it's late and that's not your usual pattern",
-      price_drop:'while the cheap window is open',
-      aqi_bad:'so the outdoor plan gets pushed inside',
-      anniversary_7:"so you'll thank me on day 6",
-      self_recheck:'I asked myself to follow up today',
-    };
-
-    const wired = { t1:null, t2:null, t3:null, x1:null, x2:null, x3:null, x4:null, x5:null };
-    let activeSlot = null;
-    let activeCat = 'trigger';
-    let running = false;
-
-    function renderSlot(slotId) {
-      const slot = canvas.querySelector(`[data-slot="${slotId}"]`);
-      const itemId = wired[slotId];
-      const isTrigger = slotId.startsWith('t');
-      if (!itemId) {
-        slot.className = 'b-slot' + (activeSlot === slotId ? ' target' : '');
-        slot.innerHTML = `
-          <span class="b-empty-plus">+</span>
-          <span class="b-empty-label">empty ${isTrigger?'trigger':'tool'} slot</span>`;
-        return;
-      }
-      const item = (isTrigger ? TRIGGERS : TOOLS).find(x => x.id === itemId);
-      if (!item) return;
-      let cls = 'b-slot filled';
-      if (!isTrigger && item.gate === 'ladder') cls += ' gated';
-      if (!isTrigger && item.gate === 'always') cls += ' always-esc';
-      slot.className = cls;
-      slot.innerHTML = `
-        <span class="b-icon">${item.icon}</span>
-        <span class="b-meta">
-          <span class="b-name">${item.name}</span>
-          <span class="b-sub">${item.sub}</span>
-        </span>
-        <span class="b-x" data-action="remove">×</span>`;
+    function setPipe(n){
+      pipeEl.querySelectorAll('.pblock').forEach((b,i)=>{ b.classList.toggle('on',i<n); b.classList.toggle('new',i===n-1); });
+      pipeEl.querySelectorAll('.parrow').forEach((a,i)=>a.classList.toggle('on',i<n-1));
+    }
+    function card(kick,html){
+      const el=document.createElement('div');
+      el.className='req';
+      el.innerHTML=`<div class="b-kick">${kick}</div>`+html;
+      stage.appendChild(el);
+      return el;
+    }
+    function sync(){
+      titleEl.textContent=TITLES[beat];
+      note.innerHTML=NOTES[beat];
+      nextBtn.textContent=BTNS[beat];
+      setPipe(beat);
+    }
+    function reset(){
+      beat=0; level=null;
+      stage.innerHTML='<div class="ac-empty">#it-help is quiet. For now.</div>';
+      nextBtn.disabled=false;
+      sync();
     }
 
-    function renderAllSlots() {
-      Object.keys(wired).forEach(renderSlot);
-      drawWires();
-      renderPalette();
-    }
-
-    function drawWires() {
-      wires.innerHTML = '';
-      const cr = canvas.getBoundingClientRect();
-      const brainRect = brain.getBoundingClientRect();
-      const bx = brainRect.left - cr.left;
-      const by = brainRect.top - cr.top;
-      const bw = brainRect.width, bh = brainRect.height;
-      const brainLeft  = { x: bx,       y: by + bh/2 };
-      const brainRight = { x: bx + bw,  y: by + bh/2 };
-
-      ['t1','t2','t3'].forEach(id => {
-        if (!wired[id]) return;
-        const el = canvas.querySelector(`[data-slot="${id}"]`);
-        const r = el.getBoundingClientRect();
-        const x = r.right - cr.left;
-        const y = r.top + r.height/2 - cr.top;
-        const path = drawCurve(x, y, brainLeft.x, brainLeft.y, false);
-        path.dataset.role = 'in';
-        path.dataset.slot = id;
-      });
-      ['x1','x2','x3','x4','x5'].forEach(id => {
-        if (!wired[id]) return;
-        const el = canvas.querySelector(`[data-slot="${id}"]`);
-        const r = el.getBoundingClientRect();
-        const x = r.left - cr.left;
-        const y = r.top + r.height/2 - cr.top;
-        const tool = TOOLS.find(t => t.id === wired[id]);
-        const path = drawCurve(brainRight.x, brainRight.y, x, y, tool && tool.gate);
-        path.dataset.role = 'out';
-        path.dataset.slot = id;
-      });
-    }
-    function drawCurve(x1, y1, x2, y2, gated) {
-      const dx = Math.max(40, (x2 - x1) * 0.5);
-      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      path.setAttribute('d', `M ${x1} ${y1} C ${x1+dx} ${y1}, ${x2-dx} ${y2}, ${x2} ${y2}`);
-      if (gated) path.classList.add('gated-wire');
-      wires.appendChild(path);
-      return path;
-    }
-
-    function renderPalette() {
-      const items = activeCat === 'trigger' ? TRIGGERS : TOOLS;
-      const placedIds = Object.values(wired).filter(Boolean);
-      palette.innerHTML = '';
-      items.forEach(item => {
-        const placed = placedIds.includes(item.id);
-        const el = document.createElement('div');
-        el.className = 'pal-item' + (placed ? ' placed' : '');
-        el.innerHTML = `
-          <span class="p-icon">${item.icon}</span>
-          <span class="p-meta">
-            <span class="p-name">${item.name}</span>
-            <span class="p-sub">${item.sub}</span>
-          </span>`;
-        if (!placed) el.addEventListener('click', () => placeItem(item));
-        palette.appendChild(el);
-      });
-    }
-
-    function placeItem(item) {
-      const isTrigger = TRIGGERS.some(t => t.id === item.id);
-      let targetSlot = activeSlot;
-      if (!targetSlot || (targetSlot.startsWith('t') !== isTrigger)) {
-        const pool = isTrigger ? ['t1','t2','t3'] : ['x1','x2','x3','x4','x5'];
-        targetSlot = pool.find(s => !wired[s]);
-        if (!targetSlot) {
-          flashReadout('miss', `All ${isTrigger?'trigger':'tool'} slots are full — remove one first (× on hover).`);
-          return;
-        }
-      }
-      wired[targetSlot] = item.id;
-      activeSlot = null;
-      clearTargets();
-      renderAllSlots();
-      updateHint();
-    }
-
-    function clearTargets() {
-      canvas.querySelectorAll('.b-slot.target').forEach(s => s.classList.remove('target'));
-    }
-
-    function updateHint() {
-      if (activeSlot) {
-        hintEl.textContent = `filling ${activeSlot.startsWith('t')?'trigger':'tool'} slot ↓`;
-        const cat = activeSlot.startsWith('t') ? 'trigger' : 'tool';
-        if (cat !== activeCat) switchTab(cat);
-      } else {
-        const filled = Object.values(wired).filter(Boolean).length;
-        if (filled === 0) hintEl.textContent = 'click a slot first ↑ — or any palette item fills the next empty slot';
-        else hintEl.textContent = `${filled} placed · click any item to fill the next empty slot`;
-      }
-    }
-    function switchTab(cat) {
-      activeCat = cat;
-      document.querySelectorAll('.palette-tab').forEach(b => {
-        b.classList.toggle('active', b.dataset.cat === cat);
-      });
-      renderPalette();
-    }
-
-    function flashReadout(tag, text) {
-      const idle = readout.querySelector('.ro-idle');
-      if (idle) idle.remove();
-      const ln = document.createElement('div');
-      ln.className = 'ro-line';
-      const tags = { trig:'TRIGGER', brain:'BRAIN', act:'ACTION', gate:'GATE', miss:'NO-OP' };
-      ln.innerHTML = `<span class="ro-tag ${tag}">${tags[tag] || tag}</span><span class="ro-body">${text}</span>`;
-      readout.appendChild(ln);
-      while (readout.children.length > 8) readout.firstChild.remove();
-      readout.scrollTop = readout.scrollHeight;
-    }
-    function clearReadout() {
-      readout.innerHTML = '';
-    }
-
-    function animatePacket(path, ms, done) {
-      if (!path) { done && done(); return; }
-      path.classList.add('live');
-      const len = path.getTotalLength();
-      const pkt = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      pkt.setAttribute('r', '5');
-      pkt.classList.add('packet');
-      wires.appendChild(pkt);
-      const start = performance.now();
-      function step(now) {
-        const t = Math.min(1, (now - start) / ms);
-        const pt = path.getPointAtLength(len * t);
-        pkt.setAttribute('cx', pt.x);
-        pkt.setAttribute('cy', pt.y);
-        if (t < 1) requestAnimationFrame(step);
-        else {
-          pkt.remove();
-          setTimeout(() => path.classList.remove('live'), 250);
-          done && done();
-        }
-      }
-      requestAnimationFrame(step);
-    }
-
-    function runTick() {
-      if (running) return;
-      const trigSlots = ['t1','t2','t3'].filter(s => wired[s]);
-      const toolSlots = ['x1','x2','x3','x4','x5'].filter(s => wired[s]);
-      if (trigSlots.length === 0) {
-        flashReadout('miss', 'No triggers wired. Nothing can wake the brain. Drop something from the palette.');
-        return;
-      }
-      running = true;
-      clearReadout();
-      const trigSlot = trigSlots[Math.floor(Math.random() * trigSlots.length)];
-      const trigId = wired[trigSlot];
-      const trig = TRIGGERS.find(t => t.id === trigId);
-      flashReadout('trig', `${trig.icon} <b>${trig.name}</b><br><span style="opacity:0.85;">${trig.fires}</span>`);
-      const trigEl = canvas.querySelector(`[data-slot="${trigSlot}"]`);
-      trigEl.classList.add('firing');
-
-      drawWires();
-      const inPath = wires.querySelector(`path[data-role="in"][data-slot="${trigSlot}"]`);
-      animatePacket(inPath, 600, () => {
-        brain.classList.add('thinking');
-        flashReadout('brain', `Reading memory · scanning ${toolSlots.length} available tool${toolSlots.length===1?'':'s'} · deciding…`);
-
-        setTimeout(() => {
-          brain.classList.remove('thinking');
-          trigEl.classList.remove('firing');
-
-          const prefList = PREFS[trigId] || [];
-          const availableToolIds = toolSlots.map(s => wired[s]);
-          const pickedTool = prefList.find(t => availableToolIds.includes(t));
-          const toolSlot = pickedTool ? toolSlots.find(s => wired[s] === pickedTool) : null;
-
-          if (!toolSlot) {
-            const want = prefList[0] ? TOOLS.find(t => t.id === prefList[0]) : null;
-            flashReadout('miss', `Brain wanted to act, but no wired tool fits this signal. <b>Doing nothing.</b>${want ? ` (Try wiring: ${want.icon} ${want.name})` : ''}`);
-            running = false;
-            return;
+    function levelBeat(){
+      const el=card('BEAT 4 — HOW MUCH WHEEL DOES IT GET?',
+        `<div class="lvl-cards">${LEVELS.map(l=>`
+          <div class="lvlc" data-n="${l.n}">
+            <span class="l-tag">Level ${l.n}</span><b>${l.name}</b>
+            <p><em>${l.line}</em></p><p>${l.desc}</p>
+          </div>`).join('')}</div>
+        <div class="lvl-res" id="lvlres"></div>`);
+      const res=el.querySelector('#lvlres');
+      el.querySelectorAll('.lvlc').forEach(c=>{
+        c.addEventListener('click',()=>{
+          level=+c.dataset.n;
+          el.querySelectorAll('.lvlc').forEach(x=>x.classList.toggle('sel',x===c));
+          res.classList.add('show');
+          if(level===2){
+            res.innerHTML=`<span class="r-badge would">📋 draft ready</span> <span class="rchip">grant_read("priya", "analytics")</span> <span class="r-btns"><button class="ok" id="lvl-approve">Approve &amp; send</button></span><div class="r-quiet" style="margin-top:6px;">at Copilot, every request works like this — nothing moves without your click</div>`;
+            res.querySelector('#lvl-approve').addEventListener('click',()=>{
+              res.innerHTML=`<span class="r-badge grant">✓ granted</span> <span class="r-quiet">clicked by you, drafted by it — safe, and you're still the bottleneck (a fast one)</span>`;
+            });
+          } else if(level===3){
+            res.innerHTML=`<span class="r-badge grant">✓ granted — solo</span> <span class="r-quiet">within policy, so it just did it. A write or admin ask would have come back to you with a recommendation attached — the takeover request from the driving game.</span>`;
+          } else {
+            res.innerHTML=`<span class="r-badge grant">✓ granted — silently</span> <span class="r-quiet">you'll read about it on Friday. So would its mistakes. That's the Level-4 trade: full speed, trailing supervision.</span>`;
           }
-          const tool = TOOLS.find(t => t.id === wired[toolSlot]);
-          let escalated = false;
-          if (tool.gate === 'always') {
-            escalated = true;
-            flashReadout('gate', `<b>Through the gate.</b> ${tool.name} always asks — drafting and escalating to you.`);
-          } else if (tool.gate === 'ladder') {
-            escalated = Math.random() < 0.55;
-            if (escalated) {
-              flashReadout('gate', `<b>Through the gate.</b> This case is above my solo authority. <b>Drafting and escalating to you.</b>`);
-            } else {
-              flashReadout('gate', `Within solo authority for this case — acting directly.`);
-            }
-          }
-
-          const outPath = wires.querySelector(`path[data-role="out"][data-slot="${toolSlot}"]`);
-          animatePacket(outPath, 700, () => {
-            const toolEl = canvas.querySelector(`[data-slot="${toolSlot}"]`);
-            toolEl.classList.add('acting');
-            const verbText = escalated
-              ? `<b>drafted</b>, awaiting your approval`
-              : `${ACT_VERBS[wired[toolSlot]] || 'acted'}`;
-            flashReadout('act', `${tool.icon} <b>${tool.name}</b> — ${verbText} — ${WHY[trigId] || 'matches what fired'}`);
-            setTimeout(() => toolEl.classList.remove('acting'), 1400);
-            running = false;
-          });
-        }, 850);
+          nextBtn.disabled=false;
+        });
       });
+      return el;
     }
 
-    // events
-    canvas.addEventListener('click', (e) => {
-      const x = e.target.closest('[data-action="remove"]');
-      if (x) {
-        e.stopPropagation();
-        const slot = x.closest('.b-slot');
-        wired[slot.dataset.slot] = null;
-        renderAllSlots();
-        updateHint();
-        return;
+    nextBtn.addEventListener('click',()=>{
+      if(nextBtn.disabled) return;
+      if(beat===5){ reset(); return; }
+      beat++;
+      if(beat===1){
+        stage.innerHTML='';
+        card('BEAT 1 — THE DOORBELL RINGS',
+          `<div class="r-ask">💬 <b>#it-help</b> · 9:14 AM<br>👩‍💻 <b>Priya</b> <span class="r-meta">· data team</span>: "hey — can I get <b>read</b> access to <code>analytics</code>? pulling churn numbers for the board deck 🙏"</div>`);
       }
-      const slot = e.target.closest('.b-slot');
-      if (!slot) return;
-      if (slot.classList.contains('filled')) return;
-      clearTargets();
-      activeSlot = slot.dataset.slot;
-      slot.classList.add('target');
-      updateHint();
+      if(beat===2){
+        const el=card('BEAT 2 — IT LOOKS',`<div class="r-chips" id="ac-chips"></div>`);
+        const chips=['team(priya) = data','owner(analytics) = data','sensitivity: normal','history(priya): no prior asks'];
+        const wrap=el.querySelector('#ac-chips');
+        chips.forEach((c,i)=>setTimeout(()=>{
+          const s=document.createElement('span');
+          s.className='rchip'; s.style.animation='acIn 0.3s ease'; s.textContent=c;
+          wrap.appendChild(s);
+        }, 250+i*450));
+      }
+      if(beat===3){
+        card('BEAT 3 — IT THINKS',
+          `<div class="r-think">"Priya is on data. data owns analytics. Read on your own team's repo — the policy covers this exactly, and her history is clean. Decision: <b>grant</b>."</div>`);
+      }
+      if(beat===4){
+        levelBeat();
+        nextBtn.disabled=true;
+      }
+      if(beat===5){
+        card('BEAT 5 — THE RECORD',
+          `<div class="d-log">{"who":"priya","ask":"read","repo":"analytics","decision":"grant","policy":"team-repo-read","mode":"L${level}","ts":"tue-09:14:12"}<br>FRI DIGEST — 14 requests · 11 routine · 2 sent to owners · 1 escalated · median time-to-access: <b>26s</b> (used to be ~4 hours)</div>`);
+      }
+      sync();
     });
 
-    document.querySelectorAll('.palette-tab').forEach(b => {
-      b.addEventListener('click', () => switchTab(b.dataset.cat));
-    });
-
-    $('bb-run').addEventListener('click', runTick);
-    $('bb-clear').addEventListener('click', () => {
-      Object.keys(wired).forEach(k => wired[k] = null);
-      activeSlot = null;
-      clearTargets();
-      renderAllSlots();
-      readout.innerHTML = '<div class="ro-line ro-idle">cleared. wire something up and hit ▶ Run a tick.</div>';
-      updateHint();
-    });
-    $('bb-am').addEventListener('click', () => {
-      wired.t1 = 'cron_morning';
-      wired.t2 = 'champion_move';
-      wired.t3 = 'webhook_ticket';
-      wired.x1 = 'read_memory';
-      wired.x2 = 'send_email';
-      wired.x3 = 'open_ticket';
-      wired.x4 = 'apply_discount';
-      wired.x5 = 'escalate';
-      activeSlot = null; clearTargets(); renderAllSlots();
-      readout.innerHTML = '';
-      flashReadout('act', '<b>AM preset loaded.</b> Hit ▶ Run a tick — sometimes the daily sweep fires, sometimes the ticket webhook, sometimes a champion-move signal. Same brain reacts differently to each.');
-      updateHint();
-    });
-    $('bb-self').addEventListener('click', () => {
-      wired.t1 = 'sleep_bad';
-      wired.t2 = 'hrv_spike';
-      wired.t3 = 'hydration_low';
-      wired.x1 = 'remind_user';
-      wired.x2 = 'send_slack';
-      wired.x3 = 'order_supplies';
-      wired.x4 = null;
-      wired.x5 = null;
-      activeSlot = null; clearTargets(); renderAllSlots();
-      readout.innerHTML = '';
-      flashReadout('act', '<b>Personal wellness preset loaded.</b> Three wearable triggers, three gentle tools. No external account-feed at all — same brain shape, totally different employee.');
-      updateHint();
-    });
-
-    window.addEventListener('resize', drawWires);
-    // redraw wires when section first scrolls into view (layout may have changed)
-    const ro = new ResizeObserver(() => drawWires());
-    ro.observe(canvas);
-
-    // init
-    renderAllSlots();
-    updateHint();
+    reset();
   })();
+
 </script>
 
 </body>
