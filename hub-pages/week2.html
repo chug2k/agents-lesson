@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Week 2 — The Access Agent in Mastra Studio</title>
+<title>Week 2 — Hello, Mastra</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⛰️</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -103,43 +103,24 @@ footer a { text-decoration: none; }
 <div class="weektabs" aria-label="Agents track weeks">
   <div class="wt-wrap">
     <a href="/agents/">WEEK 1 · TASKS VS. AGENTS</a>
-    <a href="/agents/week2/" aria-current="page">WEEK 2 · THE ACCESS AGENT IN MASTRA STUDIO</a>
+    <a href="/agents/week2/" aria-current="page">WEEK 2 · HELLO, MASTRA</a>
+    <a href="/agents/week3/">WEEK 3 · THE ACCESS AGENT</a>
   </div>
 </div>
 
 <header class="head">
   <div class="wrap">
     <span class="level">Advanced · Week 2</span>
-    <h1>The Access Agent in Mastra Studio</h1>
-    <p>Week 1 ended with a toy: an access agent simulated in your browser. This week we build
-       the real one — first as two quick spike scripts to prove the pieces work, then as a
-       Mastra project built from scratch, so Studio can watch it think.</p>
+    <h1>Hello, Mastra</h1>
+    <p>Week 1 ended with a toy: an access agent simulated in your browser. Before we build the
+       real one, we need a workbench. This week: scaffold a Mastra project, meet the example
+       weather agent in Studio, and rewire its brain to Anduin's LiteLLM proxy.</p>
   </div>
 </header>
 
 <section>
   <div class="wrap">
-    <h2><span class="n">1</span>Spike the pieces first</h2>
-    <p>Two throwaway scripts, run straight from the repo's <code>week2/</code> directory — each
-       proves one risky piece before we commit to structure:</p>
-    <ul>
-      <li><a href="https://github.com/chug2k/agents-lesson/blob/main/week2/spike-github-mcp.ts"><code>spike-github-mcp.ts</code></a> —
-          can we even reach GitHub's remote MCP server? Auths with your <code>gh</code> CLI token
-          and lists the ~44 tools it exposes. (<code>npx tsx spike-github-mcp.ts</code>)</li>
-      <li><a href="https://github.com/chug2k/agents-lesson/blob/main/week2/spike-agent.ts"><code>spike-agent.ts</code></a> —
-          the whole lesson loop in miniature: an agent with a fake-HR <code>who_is</code> tool plus
-          three GitHub tools, asked whether Priya should get repo access. It prints its verdict to
-          the console. (<code>npx tsx spike-agent.ts</code>)</li>
-    </ul>
-    <p>They work — verdict and all. But they're loose scripts: open Studio and there's nothing
-       there, because Studio only shows what's <em>registered</em>. That gap is the rest of
-       this lesson.</p>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <h2><span class="n">2</span>Scaffold a project</h2>
+    <h2><span class="n">1</span>Scaffold a project</h2>
     <p>Following the <a href="https://mastra.ai/guides/getting-started/quickstart">Mastra quickstart</a>:</p>
     <pre><code>npm create mastra@latest</code></pre>
     <p>The wizard asks a few questions — pick the same answers:</p>
@@ -152,14 +133,15 @@ footer a { text-decoration: none; }
       puts every model (Claude, GPT, and the rest) behind a single endpoint. The wizard has no
       LiteLLM option, and it doesn't need one: LiteLLM speaks the <em>OpenAI wire protocol</em>,
       so any tool's "OpenAI" setting can talk to it. Pick OpenAI, <b>skip the API key</b> (you
-      don't have an OpenAI key, and you don't need one), and in step 5 we'll point the OpenAI
-      client at the proxy's URL instead — where you can name a Claude model and it just works.
+      don't have an OpenAI key, and you don't need one) — in step 3 we'll point the project at
+      the proxy instead.
     </div>
     <p>When it finishes you get a <code>src/mastra/</code> folder with a sample weather agent,
-       tool, and workflow: the skeleton we rebuild into ours.</p>
+       tool, and workflow — a working example app we'll poke at before writing our own.</p>
     <p>There's also a gallery of <a href="https://mastra.ai/templates">templates</a> — pre-built
        projects (deep research, PDF Q&amp;A, browser agents) you can start from instead of the
-       blank scaffold. Worth a browse later; today we build our own so you see every piece.</p>
+       blank scaffold. Worth a browse later; this track builds from the bare scaffold so you see
+       every piece.</p>
     <details class="why">
       <summary>Why Mastra, and not something else?</summary>
       <ul>
@@ -177,179 +159,95 @@ footer a { text-decoration: none; }
 
 <section>
   <div class="wrap">
-    <h2><span class="n">3</span>First tool: the HR lookup</h2>
-    <p>Tools are functions with a Zod schema on both ends. Create
-       <code>src/mastra/tools/who-is.ts</code> — a fake HR system, deliberately separate from
-       GitHub so the agent has to join data across two systems:</p>
-    <pre><code>import { createTool } from '@mastra/core/tools';
-import { z } from 'zod';
-
-const ORG: Record&lt;string, { team: string; role: string; type: string }&gt; = {
-  priya: { team: 'data', role: 'analytics engineer', type: 'employee' },
-  jake: { team: 'marketing', role: 'campaign contractor', type: 'contractor' },
-};
-
-export const whoIs = createTool({
-  id: 'who_is',
-  description: 'Look up a person in the company HR system: team, role, employment type.',
-  inputSchema: z.object({ person: z.string().describe('first name, lowercase') }),
-  outputSchema: z.object({
-    found: z.boolean(),
-    team: z.string().optional(),
-    role: z.string().optional(),
-    type: z.string().optional(),
-  }),
-  execute: async ({ person }) =&gt; {
-    const rec = ORG[person.toLowerCase()];
-    return rec ? { found: true, ...rec } : { found: false };
-  },
-});</code></pre>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <h2><span class="n">4</span>Second tool source: GitHub over MCP</h2>
-    <p>We don't hand-write GitHub tools — we connect to GitHub's remote MCP server and take
-       theirs. Create <code>src/mastra/tools/github-mcp.ts</code>:</p>
-    <pre><code>import { MCPClient } from '@mastra/mcp';
-
-const token = process.env.GITHUB_TOKEN;
-
-export const githubMcp = new MCPClient({
-  servers: {
-    github: {
-      url: new URL('https://api.githubcopilot.com/mcp/'),
-      requestInit: { headers: { Authorization: `Bearer ${token}` } },
-    },
-  },
-  timeout: 60000,
-});
-
-// The server exposes ~44 tools; hand the agent only what the job needs.
-const KEEP = ['github_get_file_contents', 'github_search_repositories', 'github_get_me'];
-
-export async function getGithubTools() {
-  if (!token) {
-    console.warn('GITHUB_TOKEN not set — access agent will run without GitHub tools.');
-    return {};
-  }
-  try {
-    const all = await githubMcp.listTools();
-    return Object.fromEntries(Object.entries(all).filter(([k]) =&gt; KEEP.includes(k)));
-  } catch (e) {
-    console.warn('GitHub MCP unavailable:', String(e).slice(0, 200));
-    return {};
-  }
-}</code></pre>
-    <p>Two deliberate choices: the server exposes ~44 tools and we keep 3 — a focused toolset
-       beats a big one (less for the model to get confused by, less it can do by accident) —
-       and if GitHub is unreachable we degrade to an agent without GitHub tools instead of
-       crashing the whole Studio boot.</p>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <h2><span class="n">5</span>The agent</h2>
-    <p>Create <code>src/mastra/agents/access-agent.ts</code>. The access-review policy lives in
-       its instructions, and the tools are HR + GitHub. This is where the wizard's "OpenAI" pick
-       pays off: <code>createOpenAI</code> with a <code>baseURL</code> aims the client at the
-       LiteLLM proxy instead of OpenAI — note the model it runs is Claude:</p>
-    <pre><code>import { createOpenAI } from '@ai-sdk/openai';
-import { Agent } from '@mastra/core/agent';
-import { whoIs } from '../tools/who-is';
-import { getGithubTools } from '../tools/github-mcp';
-
-const litellm = createOpenAI({
-  baseURL: process.env.LITELLM_BASE_URL,
-  apiKey: process.env.LITELLM_API_KEY,
-});
-const MODEL = process.env.LITELLM_MODEL ?? 'anthropic.claude-sonnet-5-global';
-
-const githubTools = await getGithubTools();
-
-export const accessAgent = new Agent({
-  id: 'access-agent',
-  name: 'Access Agent',
-  description:
-    'Reviews GitHub repo access requests by joining HR data with the repo itself.',
-  instructions: `You review GitHub repo access requests for the company.
-Policy:
-- Team members get read access to repos their team maintains: recommend GRANT.
-- Write access always needs the maintaining team's sign-off: recommend ROUTE TO OWNER.
-- Admin is never automated: recommend ESCALATE.
-- Contractors never get access to repos containing customer data without sign-off.
-To decide, look the requester up in HR (who_is) and read the repo's README to
-learn what it is and who maintains it. State your reasoning, then a one-word
-verdict: GRANT, ROUTE, or ESCALATE.`,
-  model: litellm.chat(MODEL),
-  tools: { who_is: whoIs, ...githubTools },
-});</code></pre>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <h2><span class="n">6</span>Register it</h2>
-    <p><code>src/mastra/index.ts</code> is the registry — anything listed here shows up in
-       Studio. Registration is the whole trick:</p>
-    <pre><code>import { Mastra } from '@mastra/core/mastra';
-import { accessAgent } from './agents/access-agent';
-
-export const mastra = new Mastra({
-  agents: { accessAgent },
-});</code></pre>
-    <p>Secrets live in <code>.env</code> (gitignored) — see <code>.env.example</code> for the
-       shape: <code>GITHUB_TOKEN</code>, <code>LITELLM_BASE_URL</code>, <code>LITELLM_API_KEY</code>.
-       The demo target is <a href="https://github.com/chug2k/churn-dashboard"><code>chug2k/churn-dashboard</code></a> —
-       a private fixture repo whose README declares the data team as maintainer.</p>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <h2><span class="n">7</span>Boot Studio</h2>
+    <h2><span class="n">2</span>Boot Studio</h2>
     <pre><code>npm run dev</code></pre>
-    <p>(Following along from the repo instead of your own scaffold? The finished project is
-       <code>week2/</code> — <code>cd week2 &amp;&amp; npm install &amp;&amp; npm run dev</code>.)</p>
-    <p>Studio comes up at <code>localhost:4111</code>. The Access Agent is in the list
-       because it's registered — that's the difference from the spikes.</p>
+    <p>Studio comes up at <code>localhost:4111</code> — Mastra's local workbench. The scaffold's
+       Weather Agent is already in the agents list, because the scaffold registered it in
+       <code>src/mastra/index.ts</code>. Registration is what makes things visible here.</p>
     <figure>
-      <img src="walkthrough/01-agents-list.png" alt="Mastra Studio agents list showing the Access Agent">
-      <figcaption>Registered → visible.</figcaption>
+      <img src="walkthrough/01-studio-agents-list.png" alt="Mastra Studio agents list showing the scaffold's Weather Agent">
     </figure>
+    <p>Try chatting with it, though, and you'll hit a wall: the agent has no working model —
+       you skipped the OpenAI key in the wizard, remember? The body needs a brain. That's
+       step 3.</p>
   </div>
 </section>
 
 <section>
   <div class="wrap">
-    <h2><span class="n">8</span>Open the agent</h2>
-    <p>Note the tabs — Chat, Editor, Evaluate, Traces. Studio is a workbench, not just a chat window.</p>
-    <figure>
-      <img src="walkthrough/02-access-agent.png" alt="The Access Agent's page in Mastra Studio">
-    </figure>
+    <h2><span class="n">3</span>Switch the model to LiteLLM</h2>
+    <p>Two small changes point the scaffold at Anduin's proxy. First, replace the contents of
+       <code>.env</code>:</p>
+    <pre><code># Anduin LiteLLM proxy — OpenAI-compatible gateway; holds the real provider keys
+LITELLM_BASE_URL=https://litellm.anduin.center/v1
+LITELLM_API_KEY=sk-…        # ask your instructor for a key — never commit it
+LITELLM_MODEL=anthropic.claude-sonnet-5-global</code></pre>
+    <p>Then, in <code>src/mastra/agents/weather-agent.ts</code>, swap the one-line model string
+       (<code>model: 'openai/gpt-5-mini'</code>) for a gateway object:</p>
+    <pre><code>model: {
+  id: `litellm/${process.env.LITELLM_MODEL ?? 'anthropic.claude-sonnet-5-global'}`,
+  url: process.env.LITELLM_BASE_URL,
+  apiKey: process.env.LITELLM_API_KEY,
+},</code></pre>
+    <p>Mastra's model router takes any OpenAI-compatible endpoint as <code>url</code> +
+       <code>apiKey</code>; the <code>id</code> prefix (<code>litellm/</code>) is just a label,
+       and the part after the slash is the model name the proxy expects. Note what the model
+       actually is now: <b>Claude, served through a gateway that talks the OpenAI protocol</b>.
+       <code>mastra dev</code> hot-reloads — no restart needed.</p>
   </div>
 </section>
 
 <section>
   <div class="wrap">
-    <h2><span class="n">9</span>Test it</h2>
-    <p>Ask: <em>"Priya is asking for read access to the repo chug2k/churn-dashboard.
-       What do you recommend?"</em></p>
-    <p>The agent calls <code>who_is</code> (HR: employee, data team), then
-       <code>github_get_file_contents</code> (the repo's README: maintained by the data team),
-       joins the two against the policy — <span class="verdict">Verdict: GRANT</span></p>
+    <h2><span class="n">4</span>Talk to the agent</h2>
+    <p>Back in Studio, open the Weather Agent and ask: <em>"What's the weather in Tokyo?"</em>
+       Now it thinks: the agent decides to call its <code>weatherTool</code>, gets real data
+       back (the tool hits a free weather API), and composes an answer.</p>
     <figure>
-      <img src="walkthrough/03-test-prompt.png" alt="The Access Agent reasoning through the request and answering Verdict: GRANT">
-      <figcaption>One agent, two systems, a policy — and Studio to watch it think.</figcaption>
+      <img src="walkthrough/02-weather-agent-chat.png" alt="The Weather Agent in Studio answering a Tokyo weather question, with the weatherTool call visible">
     </figure>
+    <p>That's the whole agent loop from week 1, live: model picks a tool, tool runs, model reads
+       the result, answers. The difference from a plain chatbot is that <em>the model chose</em>
+       to make that call.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="n">5</span>Meet the workflow</h2>
+    <p>The scaffold also ships a <code>weather-workflow</code> — same weather domain, opposite
+       philosophy. A workflow is a <em>fixed</em> sequence of steps: fetch forecast, then plan
+       activities. No model decides what happens next; the graph does.</p>
+    <figure>
+      <img src="walkthrough/03-weather-workflow.png" alt="The weather workflow graph in Studio, with a run's step results">
+    </figure>
+    <p>This is one of Mastra's core distinctions: <b>agents</b> when the model should decide
+       what to do next, <b>workflows</b> when the steps must be predictable. You'll pick between
+       them constantly, and the scaffold hands you one of each to compare.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="n">6</span>Read the traces</h2>
+    <p>Studio's Traces view shows what actually happened on every run — each model call, each
+       tool call, inputs, outputs, and timing. When an agent misbehaves, this is where you look
+       first.</p>
+    <figure>
+      <img src="walkthrough/04-traces.png" alt="Mastra Studio traces view showing the LLM and tool spans for the weather agent run">
+      <figcaption>A workbench, not a chat window: chat, traces, evals — all pointed at the agent
+        you're building.</figcaption>
+    </figure>
+    <p>That's the tour: a scaffolded project, a live agent on the company proxy, a workflow to
+       contrast it with, and traces to see inside. Next week we put our own agent on this bench —
+       the GitHub access agent from week 1, for real.</p>
   </div>
 </section>
 
 <footer>
   <div class="wrap">
     <a href="/agents/">← Week 1 — Tasks vs. Agents</a>
+    <a href="/agents/week3/">Week 3 — The Access Agent →</a>
     <a href="https://github.com/chug2k/agents-lesson/tree/main/week2">Code on GitHub</a>
   </div>
 </footer>
