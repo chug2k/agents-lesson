@@ -2,6 +2,7 @@
 
 The spike scripts (`spike-agent.ts`, `spike-github-mcp.ts`) ran outside Mastra's
 registry. Here we port the agent into the project so Studio can see it.
+(Why Mastra and not something else? See [WHY-MASTRA.md](WHY-MASTRA.md).)
 
 ## 1. Port the agent into the registry
 

@@ -63,6 +63,18 @@ pre code { border: 0; padding: 0; background: none; }
   display: inline-block; background: var(--color-pine-soft); color: var(--color-pine);
   font-weight: 800; padding: 2px 10px; border-radius: var(--radius-full);
 }
+details.why {
+  background: var(--color-surface); border: 1px solid var(--color-line); border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-lg); margin-top: var(--space-md);
+}
+details.why summary {
+  cursor: pointer; font-weight: 700; color: var(--color-navy); font-size: var(--text-sm);
+}
+details.why summary::marker { color: var(--color-blue); }
+details.why ul { margin: var(--space-sm) 0 0; padding-left: 20px; }
+details.why li { font-size: var(--text-sm); color: var(--color-muted); margin-bottom: 6px; }
+details.why li b { color: var(--color-ink); }
+details.why .full { font-size: var(--text-xs); margin-top: var(--space-sm); display: inline-block; }
 footer { border-top: 1px solid var(--color-line); margin-top: var(--space-2xl); padding: var(--space-lg) 0 var(--space-2xl); }
 footer .wrap { display: flex; gap: var(--space-lg); font-size: var(--text-sm); color: var(--color-muted); flex-wrap: wrap; }
 footer a { text-decoration: none; }
@@ -93,8 +105,9 @@ footer a { text-decoration: none; }
   <div class="wrap">
     <span class="level">Advanced · Week 2</span>
     <h1>The Access Agent in Mastra Studio</h1>
-    <p>Last week's spike scripts ran outside Mastra's registry — nothing showed up in Studio.
-       This week we port the agent in properly and watch it think.</p>
+    <p>Last week's spike scripts worked — the agent answered, verdict and all. But they ran
+       outside Mastra's registry, so Studio had nothing to show. This week we port the agent
+       in properly and watch it think.</p>
   </div>
 </header>
 
@@ -108,6 +121,19 @@ footer a { text-decoration: none; }
       <li><code>src/mastra/agents/access-agent.ts</code> — the agent: access policy in its instructions, HR + GitHub tools.</li>
       <li><code>src/mastra/index.ts</code> — <code>new Mastra({ agents: { accessAgent } })</code>. Registration is the whole trick.</li>
     </ul>
+    <details class="why">
+      <summary>Why Mastra, and not something else?</summary>
+      <ul>
+        <li><b>Why any framework:</b> the vanilla loop is easy to write and easy to write wrong — a framework gives a named place for agents, tools, and instructions, typed inputs, and Studio instead of console logs.</li>
+        <li><b>Vercel AI SDK</b> — great for AI inside a web app (Mastra uses it under the hood), but no memory, evals, or Studio.</li>
+        <li><b>LangChain / LangGraph</b> — most proven, most painful: Python-first heritage, heavy graph abstraction, API churn.</li>
+        <li><b>OpenAI Agents SDK</b> — simplest loop, but OpenAI-shaped; we route through a LiteLLM proxy.</li>
+        <li><b>CrewAI / Pydantic AI / smolagents</b> — Python; our audience lives in TypeScript.</li>
+        <li><b>Cheap to reverse:</b> tools arrive over MCP, which is framework-agnostic — switching later is a port, not a rewrite.</li>
+      </ul>
+      <a class="full" href="https://github.com/chug2k/agents-lesson/blob/main/week2/WHY-MASTRA.md">Full write-up: WHY-MASTRA.md →</a>
+    </details>
+
   </div>
 </section>
 
