@@ -1,31 +1,74 @@
-/* Hallmark · macrostructure: Journey Path (design.md-managed) · tone: grown-up gamification
- * theme: Trailhead (adopted from apps/academy/DESIGN.md) · anchor hue: pine teal
- * fonts: Fraunces (display, roman) + Plus Jakarta Sans (body) · paper: warm off-white
- * pre-emit critique: P4 H4 E4 S4 R5 V4
+/* Hallmark · macrostructure: Option Grid (design-system-managed) · tone: product-utilitarian
+ * theme: studied-DNA (source: AI-Hivemind-Lab/anduin-design-system-2026)
+ * fonts: Manrope (display+body) + IBM Plex Mono (labels) · paper: white · accent: Anduin blue #1075DC
+ * pre-emit critique: P4 H5 E4 S5 R5 V4
  */
 :root {
-  --color-paper: #faf7f2;
-  --color-surface: #ffffff;
-  --color-surface-2: #fffdf8;
-  --color-ink: #23201b;
-  --color-muted: #6b6459;
-  --color-line: #eae3d6;
-  --color-pine: #0f766e;
-  --color-pine-strong: #0b5a50;
-  --color-pine-soft: #eaf5f3;
-  --color-ember: #f59e0b;
-  --color-ember-soft: #fdeacb;
+  /* Anduin Design System 2026 — brand primaries */
+  --color-navy: #162950;
+  --color-blue: #1075DC;
+  --color-blue-dark: #0158AE;
+  --color-blue-tint: #DCF2FA;
+  --color-coral: #EF6445;
+  --color-coral-tint: #FCE7E0;
+  --color-black: #141414;
+  --color-white: #ffffff;
 
-  --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
-  --font-body: "Plus Jakarta Sans", -apple-system, "Segoe UI", sans-serif;
+  /* Expressive accents (product context) */
+  --color-aqua: #00E2DF;
+  --color-violet: #6B3BEB;
+  --color-lagoon: #024F65;
 
+  /* Icy neutrals */
+  --color-neutral-1: #EDEFF2;
+  --color-neutral-2: #E7E9ED;
+  --color-neutral-3: #CCD2DB;
+  --color-neutral-6: #646E82;
+  --color-neutral-7: #323C4D;
+  --color-neutral-8: #1D2939;
+
+  --font-primary: "Manrope", -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --text-h2: clamp(2rem, 4vw, 2.5rem);
+  --text-h3: clamp(1.75rem, 3vw, 2.25rem);
+  --text-p2: 1.125rem;
+  --text-p3: 1rem;
+  --text-p4: 0.875rem;
+  --text-caption: 0.75rem;
+
+  --radius-s: 6px;
+  --radius-m: 8px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  --elevation-1: 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.10);
+  --elevation-2: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-move: 180ms;
+  --wrap: 1180px;
+
+  /* ── Legacy aliases: the /agents lesson pages consume these names ── */
+  --color-paper: var(--color-white);
+  --color-surface: var(--color-white);
+  --color-surface-2: var(--color-neutral-1);
+  --color-ink: var(--color-black);
+  --color-muted: var(--color-neutral-6);
+  --color-line: var(--color-neutral-2);
+  --color-pine: var(--color-blue);
+  --color-pine-strong: var(--color-blue-dark);
+  --color-pine-soft: var(--color-blue-tint);
+  --color-ember: var(--color-coral);
+  --color-ember-soft: var(--color-coral-tint);
+  --font-display: var(--font-primary);
+  --font-body: var(--font-primary);
   --text-display: clamp(1.9rem, 4.5vw, 2.9rem);
   --text-2xl: 1.5rem;
   --text-lg: 1.125rem;
   --text-base: 1rem;
   --text-sm: 0.875rem;
   --text-xs: 0.75rem;
-
   --space-xs: 4px;
   --space-sm: 8px;
   --space-md: 16px;
@@ -33,31 +76,8 @@
   --space-xl: 32px;
   --space-2xl: 48px;
   --space-3xl: 64px;
-
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-full: 9999px;
-
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --radius-sm: var(--radius-s);
+  --radius-md: var(--radius-m);
+  --radius-lg: 12px;
   --dur-press: 60ms;
-  --dur-move: 200ms;
-
-  --wrap: 1180px;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-paper: #1a1712;
-    --color-surface: #23201a;
-    --color-surface-2: #282419;
-    --color-ink: #f4efe4;
-    --color-muted: #a89e8c;
-    --color-line: rgba(255, 255, 255, 0.09);
-    --color-pine: #2dd4bf;
-    --color-pine-strong: #0e9384;
-    --color-pine-soft: #123c39;
-    --color-ember: #fbbf24;
-    --color-ember-soft: #3a2f14;
-  }
 }

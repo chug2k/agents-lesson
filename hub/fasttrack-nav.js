@@ -20,16 +20,16 @@
       .bar {
         display: flex; align-items: center; gap: 16px;
         padding: 0 24px; height: 44px;
-        background: #fffdf8; border-bottom: 1px solid #eae3d6;
-        font: 600 13px/1 "Plus Jakarta Sans", -apple-system, "Segoe UI", sans-serif;
+        background: #ffffff; border-bottom: 1px solid #E7E9ED;
+        font: 600 13px/1 "IBM Plex Mono", ui-monospace, monospace;
       }
       a { text-decoration: none; }
-      .wordmark { color: #23201b; font-family: "Fraunces", Georgia, serif; font-size: 15px; font-weight: 700; }
-      .wordmark span { color: #0f766e; }
+      .wordmark { color: #162950; font-family: "Manrope", -apple-system, sans-serif; font-size: 15px; font-weight: 700; }
+      .wordmark span { color: #1075DC; }
       .tracks { display: flex; gap: 4px; flex: 1; min-width: 0; overflow-x: auto; }
-      .tracks a { color: #6b6459; padding: 6px 10px; border-radius: 8px; white-space: nowrap; }
-      .tracks a:hover { color: #0f766e; background: #eaf5f3; }
-      .tracks a[aria-current="true"] { color: #0f766e; background: #eaf5f3; }
+      .tracks a { color: #646E82; padding: 6px 10px; border-radius: 8px; white-space: nowrap; }
+      .tracks a:hover { color: #1075DC; background: #DCF2FA; }
+      .tracks a[aria-current="true"] { color: #1075DC; background: #DCF2FA; }
       @media (prefers-color-scheme: dark) {
         .bar { background: #23201a; border-bottom-color: rgba(255,255,255,.09); }
         .wordmark { color: #f4efe4; }
@@ -39,7 +39,7 @@
       }
     </style>
     <nav class="bar" aria-label="Fast Track programs">
-      <a class="wordmark" href="${HUB_URL}">Anduin <span>Fast Track</span></a>
+      <a class="wordmark" href="${HUB_URL}">Anduin <span>AI Learning</span></a>
       <div class="tracks">
         ${Object.entries(SITES)
           .map(
