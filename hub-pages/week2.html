@@ -75,6 +75,12 @@ details.why ul { margin: var(--space-sm) 0 0; padding-left: 20px; }
 details.why li { font-size: var(--text-sm); color: var(--color-muted); margin-bottom: 6px; }
 details.why li b { color: var(--color-ink); }
 details.why .full { font-size: var(--text-xs); margin-top: var(--space-sm); display: inline-block; }
+.note {
+  background: var(--color-surface); border-left: 3px solid var(--color-blue);
+  border-radius: var(--radius-sm); padding: var(--space-md) var(--space-lg);
+  margin-top: var(--space-md); font-size: var(--text-sm);
+}
+.note b { color: var(--color-navy); }
 footer { border-top: 1px solid var(--color-line); margin-top: var(--space-2xl); padding: var(--space-lg) 0 var(--space-2xl); }
 footer .wrap { display: flex; gap: var(--space-lg); font-size: var(--text-sm); color: var(--color-muted); flex-wrap: wrap; }
 footer a { text-decoration: none; }
@@ -139,10 +145,16 @@ footer a { text-decoration: none; }
     <p>The wizard asks a few questions — pick the same answers:</p>
     <figure>
       <img src="walkthrough/00-create-mastra.png" alt="The create-mastra wizard with the answers to pick: OpenAI as provider, skip the API key, no observability, Skills + Claude Code, init git">
-      <figcaption>OpenAI as the provider is not a typo — our LiteLLM proxy speaks the OpenAI
-        protocol, so this is the setting that lets us point the agent at it. Skip the API key;
-        the real credentials go in <code>.env</code> shortly.</figcaption>
     </figure>
+    <div class="note">
+      <b>Why "OpenAI" when we don't use OpenAI directly?</b> At Anduin, all model access goes
+      through the company <b>LiteLLM proxy</b> — one gateway that holds the real API keys and
+      puts every model (Claude, GPT, and the rest) behind a single endpoint. The wizard has no
+      LiteLLM option, and it doesn't need one: LiteLLM speaks the <em>OpenAI wire protocol</em>,
+      so any tool's "OpenAI" setting can talk to it. Pick OpenAI, <b>skip the API key</b> (you
+      don't have an OpenAI key, and you don't need one), and in step 5 we'll point the OpenAI
+      client at the proxy's URL instead — where you can name a Claude model and it just works.
+    </div>
     <p>When it finishes you get a <code>src/mastra/</code> folder with a sample weather agent,
        tool, and workflow: the skeleton we rebuild into ours.</p>
     <p>There's also a gallery of <a href="https://mastra.ai/templates">templates</a> — pre-built
@@ -241,8 +253,9 @@ export async function getGithubTools() {
   <div class="wrap">
     <h2><span class="n">5</span>The agent</h2>
     <p>Create <code>src/mastra/agents/access-agent.ts</code>. The access-review policy lives in
-       its instructions; the model is our LiteLLM proxy (an OpenAI-compatible endpoint); the
-       tools are HR + GitHub:</p>
+       its instructions, and the tools are HR + GitHub. This is where the wizard's "OpenAI" pick
+       pays off: <code>createOpenAI</code> with a <code>baseURL</code> aims the client at the
+       LiteLLM proxy instead of OpenAI — note the model it runs is Claude:</p>
     <pre><code>import { createOpenAI } from '@ai-sdk/openai';
 import { Agent } from '@mastra/core/agent';
 import { whoIs } from '../tools/who-is';
