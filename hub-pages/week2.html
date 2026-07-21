@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Week 2 — The Access Agent in Mastra Studio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⛰️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/tokens.css">
+<style>
+/* Hallmark · lesson page — Trailhead system, tokens via /tokens.css */
+* { box-sizing: border-box; }
+html, body { margin: 0; overflow-x: clip; }
+body {
+  background: var(--color-paper); color: var(--color-ink);
+  font-family: var(--font-body); line-height: 1.65; -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 760px; margin: 0 auto; padding: 0 var(--space-lg); }
+h1, h2 { font-family: var(--font-display); font-style: normal; font-weight: 600; line-height: 1.15; overflow-wrap: anywhere; }
+a { color: var(--color-pine); }
+.crumbs { border-bottom: 1px solid var(--color-line); background: var(--color-surface-2); }
+.crumbs .wrap { display: flex; gap: var(--space-sm); align-items: center; height: 52px; font-size: var(--text-sm); font-weight: 600; }
+.crumbs a { text-decoration: none; }
+.crumbs span { color: var(--color-muted); }
+.head { padding: var(--space-2xl) 0 var(--space-lg); }
+.head .level {
+  display: block; font-size: var(--text-xs); font-weight: 800; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--color-pine); margin-bottom: var(--space-xs);
+}
+h1 { font-size: var(--text-display); margin: 0 0 var(--space-sm); }
+.head p { color: var(--color-muted); margin: 0; }
+section { padding: var(--space-lg) 0; }
+h2 { font-size: var(--text-2xl); margin: 0 0 var(--space-sm); }
+h2 .n {
+  display: inline-flex; width: 30px; height: 30px; border-radius: var(--radius-full);
+  background: var(--color-pine); color: var(--color-surface); font-family: var(--font-body);
+  font-size: var(--text-sm); font-weight: 800; align-items: center; justify-content: center;
+  vertical-align: 4px; margin-right: var(--space-sm);
+}
+figure { margin: var(--space-md) 0 0; }
+figure img { max-width: 100%; display: block; border: 1px solid var(--color-line); border-radius: var(--radius-md); }
+figcaption { font-size: var(--text-xs); color: var(--color-muted); margin-top: var(--space-sm); }
+code, pre {
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 0.875em;
+  background: var(--color-surface); border: 1px solid var(--color-line); border-radius: var(--radius-sm);
+}
+code { padding: 1px 5px; }
+pre { padding: var(--space-md); overflow-x: auto; }
+pre code { border: 0; padding: 0; background: none; }
+.verdict {
+  display: inline-block; background: var(--color-pine-soft); color: var(--color-pine);
+  font-weight: 800; padding: 2px 10px; border-radius: var(--radius-full);
+}
+footer { border-top: 1px solid var(--color-line); margin-top: var(--space-2xl); padding: var(--space-lg) 0 var(--space-2xl); }
+footer .wrap { display: flex; gap: var(--space-lg); font-size: var(--text-sm); color: var(--color-muted); flex-wrap: wrap; }
+footer a { text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="crumbs">
+  <div class="wrap">
+    <a href="/">Fast Track</a><span>/</span><a href="/agents/">Agents</a><span>/ Week 2</span>
+  </div>
+</div>
+
+<header class="head">
+  <div class="wrap">
+    <span class="level">Advanced · Week 2</span>
+    <h1>The Access Agent in Mastra Studio</h1>
+    <p>Last week's spike scripts ran outside Mastra's registry — nothing showed up in Studio.
+       This week we port the agent in properly and watch it think.</p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2><span class="n">1</span>Port the agent into the registry</h2>
+    <p>Four small files turn the spikes into a real Mastra project:</p>
+    <ul>
+      <li><code>src/mastra/tools/who-is.ts</code> — the fake-HR <code>who_is</code> tool.</li>
+      <li><code>src/mastra/tools/github-mcp.ts</code> — GitHub remote MCP client; ~44 tools exposed, we keep 3.</li>
+      <li><code>src/mastra/agents/access-agent.ts</code> — the agent: access policy in its instructions, HR + GitHub tools.</li>
+      <li><code>src/mastra/index.ts</code> — <code>new Mastra({ agents: { accessAgent } })</code>. Registration is the whole trick.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="n">2</span>Boot Studio</h2>
+    <pre><code>cd week2 && npm install && npm run dev</code></pre>
+    <p>Studio comes up at <code>localhost:4111</code>. The Access Agent is in the list
+       because it's registered — that's the difference from the spikes.</p>
+    <figure>
+      <img src="walkthrough/01-agents-list.png" alt="Mastra Studio agents list showing the Access Agent">
+      <figcaption>Registered → visible.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="n">3</span>Open the agent</h2>
+    <p>Note the tabs — Chat, Editor, Evaluate, Traces. Studio is a workbench, not just a chat window.</p>
+    <figure>
+      <img src="walkthrough/02-access-agent.png" alt="The Access Agent's page in Mastra Studio">
+    </figure>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="n">4</span>Test it</h2>
+    <p>Ask: <em>"Priya is asking for read access to the repo chug2k/churn-dashboard.
+       What do you recommend?"</em></p>
+    <p>The agent calls <code>who_is</code> (HR: employee, data team), then
+       <code>github_get_file_contents</code> (the repo's README: maintained by the data team),
+       joins the two against the policy — <span class="verdict">Verdict: GRANT</span></p>
+    <figure>
+      <img src="walkthrough/03-test-prompt.png" alt="The Access Agent reasoning through the request and answering Verdict: GRANT">
+      <figcaption>One agent, two systems, a policy — and Studio to watch it think.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <a href="/agents/">← Week 1 — Tasks vs. Agents</a>
+    <a href="https://github.com/chug2k/agents-lesson/tree/main/week2">Code on GitHub</a>
+  </div>
+</footer>
+
+</body>
+</html>

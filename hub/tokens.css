@@ -1,0 +1,63 @@
+/* Hallmark · macrostructure: Journey Path (design.md-managed) · tone: grown-up gamification
+ * theme: Trailhead (adopted from apps/academy/DESIGN.md) · anchor hue: pine teal
+ * fonts: Fraunces (display, roman) + Plus Jakarta Sans (body) · paper: warm off-white
+ * pre-emit critique: P4 H4 E4 S4 R5 V4
+ */
+:root {
+  --color-paper: #faf7f2;
+  --color-surface: #ffffff;
+  --color-surface-2: #fffdf8;
+  --color-ink: #23201b;
+  --color-muted: #6b6459;
+  --color-line: #eae3d6;
+  --color-pine: #0f766e;
+  --color-pine-strong: #0b5a50;
+  --color-pine-soft: #eaf5f3;
+  --color-ember: #f59e0b;
+  --color-ember-soft: #fdeacb;
+
+  --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
+  --font-body: "Plus Jakarta Sans", -apple-system, "Segoe UI", sans-serif;
+
+  --text-display: clamp(1.9rem, 4.5vw, 2.9rem);
+  --text-2xl: 1.5rem;
+  --text-lg: 1.125rem;
+  --text-base: 1rem;
+  --text-sm: 0.875rem;
+  --text-xs: 0.75rem;
+
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-press: 60ms;
+  --dur-move: 200ms;
+
+  --wrap: 1180px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-paper: #1a1712;
+    --color-surface: #23201a;
+    --color-surface-2: #282419;
+    --color-ink: #f4efe4;
+    --color-muted: #a89e8c;
+    --color-line: rgba(255, 255, 255, 0.09);
+    --color-pine: #2dd4bf;
+    --color-pine-strong: #0e9384;
+    --color-pine-soft: #123c39;
+    --color-ember: #fbbf24;
+    --color-ember-soft: #3a2f14;
+  }
+}
