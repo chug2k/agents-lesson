@@ -56,6 +56,12 @@ main { flex: 1; display: flex; align-items: center; padding: var(--space-2xl) 0;
   display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-lg); width: 100%;
 }
+.option { position: relative; }
+.option h2 a { color: inherit; text-decoration: none; }
+.option h2 a.stretch::after { content: ""; position: absolute; inset: 0; }
+.option .weeks { display: flex; flex-direction: column; gap: 4px; position: relative; z-index: 1; }
+.option .weeks a { font-size: var(--text-p4); font-weight: 700; color: var(--color-blue); text-decoration: none; width: fit-content; }
+.option .weeks a:hover { text-decoration: underline; }
 .option {
   display: block; text-decoration: none; color: var(--color-black);
   background: var(--color-white);
@@ -141,12 +147,15 @@ footer a:hover { color: var(--color-blue); }
         <p>The durable engineering skills underneath the vibe — self-contained topics, any order.</p>
         <span class="go">Browse topics →</span>
       </a>
-      <a class="option o-agents" href="/agents/">
+      <div class="option o-agents">
         <span class="tag">ADVANCED</span>
-        <h2>Agents</h2>
-        <p>Build software that acts: an agent that reads your systems, weighs a policy, makes a call.</p>
-        <span class="go">Enter the track →</span>
-      </a>
+        <h2><a class="stretch" href="/agents/">Agents</a></h2>
+        <p>Build software that acts — from tasks-vs-agents to a working access agent in Mastra Studio.</p>
+        <span class="weeks">
+          <a href="/agents/">Week 1 · Tasks vs. Agents →</a>
+          <a href="/agents/week2/">Week 2 · The Access Agent in Mastra Studio →</a>
+        </span>
+      </div>
       <a class="option o-academy" href="https://academy.anduincapital.dev">
         <span class="tag">PRACTICE</span>
         <h2>Academy</h2>

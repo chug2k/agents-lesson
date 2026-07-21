@@ -625,6 +625,13 @@
   .st-tabs a:hover { color: var(--navy); }
   .st-tabs a[aria-current="page"] { color: var(--navy); border-bottom-color: var(--accent); }
 
+
+  .weektabs { border-bottom: 1px solid var(--rule); background: var(--tag-bg); }
+  .weektabs .wt-wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; display: flex; gap: 4px; height: 42px; align-items: stretch; overflow-x: auto; }
+  .weektabs a { display: inline-flex; align-items: center; padding: 0 14px; font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--faint); text-decoration: none; white-space: nowrap; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .weektabs a:hover { color: var(--navy); }
+  .weektabs a[aria-current="page"] { color: var(--navy); border-bottom-color: var(--accent); }
+
 </style>
 </head>
 <body>
@@ -641,6 +648,13 @@
     </div>
   </div>
 </nav>
+
+<div class="weektabs" aria-label="Agents track weeks">
+  <div class="wt-wrap">
+    <a href="/agents/" aria-current="page">WEEK 1 · TASKS VS. AGENTS</a>
+    <a href="/agents/week2/">WEEK 2 · THE ACCESS AGENT IN MASTRA STUDIO</a>
+  </div>
+</div>
 
 <header class="masthead">
   <div class="wrap">
@@ -915,6 +929,7 @@
 
 <footer>
   <div class="wrap">
+    <p style="margin-bottom:14px;"><a href="/agents/week2/" style="font-family:var(--body);font-weight:700;font-size:16px;color:var(--accent);text-decoration:none;">Next — Week 2: port this agent into Mastra Studio and watch it think →</a></p>
     <p>MANAGED AGENTS · 101 — a working note</p>
     <p>Worked example: a GitHub repo-access agent. Trigger → eyes → policy → gated hands → audit.</p>
     <p>Next week: the same agent, built for real, in Mastra.</p>
