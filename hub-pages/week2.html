@@ -106,8 +106,8 @@ footer a { text-decoration: none; }
     <span class="level">Advanced · Week 2</span>
     <h1>The Access Agent in Mastra Studio</h1>
     <p>Week 1 ended with a toy: an access agent simulated in your browser. This week we build
-       the real one — first as two quick spike scripts to prove the pieces work, then ported
-       into Mastra properly so Studio can watch it think.</p>
+       the real one — first as two quick spike scripts to prove the pieces work, then as a
+       Mastra project built from scratch, so Studio can watch it think.</p>
   </div>
 </header>
 
@@ -133,14 +133,21 @@ footer a { text-decoration: none; }
 
 <section>
   <div class="wrap">
-    <h2><span class="n">2</span>Port the agent into the registry</h2>
-    <p>Four small files turn the spikes into a real Mastra project:</p>
-    <ul>
-      <li><code>src/mastra/tools/who-is.ts</code> — the fake-HR <code>who_is</code> tool.</li>
-      <li><code>src/mastra/tools/github-mcp.ts</code> — GitHub remote MCP client; ~44 tools exposed, we keep 3.</li>
-      <li><code>src/mastra/agents/access-agent.ts</code> — the agent: access policy in its instructions, HR + GitHub tools.</li>
-      <li><code>src/mastra/index.ts</code> — <code>new Mastra({ agents: { accessAgent } })</code>. Registration is the whole trick.</li>
-    </ul>
+    <h2><span class="n">2</span>Scaffold a project</h2>
+    <p>Following the <a href="https://mastra.ai/guides/getting-started/quickstart">Mastra quickstart</a>:</p>
+    <pre><code>npm create mastra@latest</code></pre>
+    <p>The wizard asks a few questions — pick the same answers:</p>
+    <figure>
+      <img src="walkthrough/00-create-mastra.png" alt="The create-mastra wizard with the answers to pick: OpenAI as provider, skip the API key, no observability, Skills + Claude Code, init git">
+      <figcaption>OpenAI as the provider is not a typo — our LiteLLM proxy speaks the OpenAI
+        protocol, so this is the setting that lets us point the agent at it. Skip the API key;
+        the real credentials go in <code>.env</code> shortly.</figcaption>
+    </figure>
+    <p>When it finishes you get a <code>src/mastra/</code> folder with a sample weather agent,
+       tool, and workflow: the skeleton we rebuild into ours.</p>
+    <p>There's also a gallery of <a href="https://mastra.ai/templates">templates</a> — pre-built
+       projects (deep research, PDF Q&amp;A, browser agents) you can start from instead of the
+       blank scaffold. Worth a browse later; today we build our own so you see every piece.</p>
     <details class="why">
       <summary>Why Mastra, and not something else?</summary>
       <ul>
@@ -149,18 +156,150 @@ footer a { text-decoration: none; }
         <li><b>LangChain / LangGraph</b> — most proven, most painful: Python-first heritage, heavy graph abstraction, API churn.</li>
         <li><b>OpenAI Agents SDK</b> — simplest loop, but OpenAI-shaped; we route through a LiteLLM proxy.</li>
         <li><b>CrewAI / Pydantic AI / smolagents</b> — Python; our audience lives in TypeScript.</li>
+        <li><b>Mastra's tenets:</b> TypeScript-native and typed end-to-end (Zod on every tool), one opinionated API, agents vs. workflows as an explicit distinction, batteries included (memory, evals, tracing, MCP), model-agnostic, local-first via Studio.</li>
         <li><b>Cheap to reverse:</b> tools arrive over MCP, which is framework-agnostic — switching later is a port, not a rewrite.</li>
       </ul>
-      <a class="full" href="https://github.com/chug2k/agents-lesson/blob/main/week2/WHY-MASTRA.md">Full write-up: WHY-MASTRA.md →</a>
     </details>
-
   </div>
 </section>
 
 <section>
   <div class="wrap">
-    <h2><span class="n">3</span>Boot Studio</h2>
-    <pre><code>cd week2 && npm install && npm run dev</code></pre>
+    <h2><span class="n">3</span>First tool: the HR lookup</h2>
+    <p>Tools are functions with a Zod schema on both ends. Create
+       <code>src/mastra/tools/who-is.ts</code> — a fake HR system, deliberately separate from
+       GitHub so the agent has to join data across two systems:</p>
+    <pre><code>import { createTool } from '@mastra/core/tools';
+import { z } from 'zod';
+
+const ORG: Record&lt;string, { team: string; role: string; type: string }&gt; = {
+  priya: { team: 'data', role: 'analytics engineer', type: 'employee' },
+  jake: { team: 'marketing', role: 'campaign contractor', type: 'contractor' },
+};
+
+export const whoIs = createTool({
+  id: 'who_is',
+  description: 'Look up a person in the company HR system: team, role, employment type.',
+  inputSchema: z.object({ person: z.string().describe('first name, lowercase') }),
+  outputSchema: z.object({
+    found: z.boolean(),
+    team: z.string().optional(),
+    role: z.string().optional(),
+    type: z.string().optional(),
+  }),
+  execute: async ({ person }) =&gt; {
+    const rec = ORG[person.toLowerCase()];
+    return rec ? { found: true, ...rec } : { found: false };
+  },
+});</code></pre>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="n">4</span>Second tool source: GitHub over MCP</h2>
+    <p>We don't hand-write GitHub tools — we connect to GitHub's remote MCP server and take
+       theirs. Create <code>src/mastra/tools/github-mcp.ts</code>:</p>
+    <pre><code>import { MCPClient } from '@mastra/mcp';
+
+const token = process.env.GITHUB_TOKEN;
+
+export const githubMcp = new MCPClient({
+  servers: {
+    github: {
+      url: new URL('https://api.githubcopilot.com/mcp/'),
+      requestInit: { headers: { Authorization: `Bearer ${token}` } },
+    },
+  },
+  timeout: 60000,
+});
+
+// The server exposes ~44 tools; hand the agent only what the job needs.
+const KEEP = ['github_get_file_contents', 'github_search_repositories', 'github_get_me'];
+
+export async function getGithubTools() {
+  if (!token) {
+    console.warn('GITHUB_TOKEN not set — access agent will run without GitHub tools.');
+    return {};
+  }
+  try {
+    const all = await githubMcp.listTools();
+    return Object.fromEntries(Object.entries(all).filter(([k]) =&gt; KEEP.includes(k)));
+  } catch (e) {
+    console.warn('GitHub MCP unavailable:', String(e).slice(0, 200));
+    return {};
+  }
+}</code></pre>
+    <p>Two deliberate choices: the server exposes ~44 tools and we keep 3 — a focused toolset
+       beats a big one (less for the model to get confused by, less it can do by accident) —
+       and if GitHub is unreachable we degrade to an agent without GitHub tools instead of
+       crashing the whole Studio boot.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="n">5</span>The agent</h2>
+    <p>Create <code>src/mastra/agents/access-agent.ts</code>. The access-review policy lives in
+       its instructions; the model is our LiteLLM proxy (an OpenAI-compatible endpoint); the
+       tools are HR + GitHub:</p>
+    <pre><code>import { createOpenAI } from '@ai-sdk/openai';
+import { Agent } from '@mastra/core/agent';
+import { whoIs } from '../tools/who-is';
+import { getGithubTools } from '../tools/github-mcp';
+
+const litellm = createOpenAI({
+  baseURL: process.env.LITELLM_BASE_URL,
+  apiKey: process.env.LITELLM_API_KEY,
+});
+const MODEL = process.env.LITELLM_MODEL ?? 'anthropic.claude-sonnet-5-global';
+
+const githubTools = await getGithubTools();
+
+export const accessAgent = new Agent({
+  id: 'access-agent',
+  name: 'Access Agent',
+  description:
+    'Reviews GitHub repo access requests by joining HR data with the repo itself.',
+  instructions: `You review GitHub repo access requests for the company.
+Policy:
+- Team members get read access to repos their team maintains: recommend GRANT.
+- Write access always needs the maintaining team's sign-off: recommend ROUTE TO OWNER.
+- Admin is never automated: recommend ESCALATE.
+- Contractors never get access to repos containing customer data without sign-off.
+To decide, look the requester up in HR (who_is) and read the repo's README to
+learn what it is and who maintains it. State your reasoning, then a one-word
+verdict: GRANT, ROUTE, or ESCALATE.`,
+  model: litellm.chat(MODEL),
+  tools: { who_is: whoIs, ...githubTools },
+});</code></pre>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="n">6</span>Register it</h2>
+    <p><code>src/mastra/index.ts</code> is the registry — anything listed here shows up in
+       Studio. Registration is the whole trick:</p>
+    <pre><code>import { Mastra } from '@mastra/core/mastra';
+import { accessAgent } from './agents/access-agent';
+
+export const mastra = new Mastra({
+  agents: { accessAgent },
+});</code></pre>
+    <p>Secrets live in <code>.env</code> (gitignored) — see <code>.env.example</code> for the
+       shape: <code>GITHUB_TOKEN</code>, <code>LITELLM_BASE_URL</code>, <code>LITELLM_API_KEY</code>.
+       The demo target is <a href="https://github.com/chug2k/churn-dashboard"><code>chug2k/churn-dashboard</code></a> —
+       a private fixture repo whose README declares the data team as maintainer.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="n">7</span>Boot Studio</h2>
+    <pre><code>npm run dev</code></pre>
+    <p>(Following along from the repo instead of your own scaffold? The finished project is
+       <code>week2/</code> — <code>cd week2 &amp;&amp; npm install &amp;&amp; npm run dev</code>.)</p>
     <p>Studio comes up at <code>localhost:4111</code>. The Access Agent is in the list
        because it's registered — that's the difference from the spikes.</p>
     <figure>
@@ -172,7 +311,7 @@ footer a { text-decoration: none; }
 
 <section>
   <div class="wrap">
-    <h2><span class="n">4</span>Open the agent</h2>
+    <h2><span class="n">8</span>Open the agent</h2>
     <p>Note the tabs — Chat, Editor, Evaluate, Traces. Studio is a workbench, not just a chat window.</p>
     <figure>
       <img src="walkthrough/02-access-agent.png" alt="The Access Agent's page in Mastra Studio">
@@ -182,7 +321,7 @@ footer a { text-decoration: none; }
 
 <section>
   <div class="wrap">
-    <h2><span class="n">5</span>Test it</h2>
+    <h2><span class="n">9</span>Test it</h2>
     <p>Ask: <em>"Priya is asking for read access to the repo chug2k/churn-dashboard.
        What do you recommend?"</em></p>
     <p>The agent calls <code>who_is</code> (HR: employee, data team), then
