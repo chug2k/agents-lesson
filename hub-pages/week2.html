@@ -105,15 +105,35 @@ footer a { text-decoration: none; }
   <div class="wrap">
     <span class="level">Advanced · Week 2</span>
     <h1>The Access Agent in Mastra Studio</h1>
-    <p>Last week's spike scripts worked — the agent answered, verdict and all. But they ran
-       outside Mastra's registry, so Studio had nothing to show. This week we port the agent
-       in properly and watch it think.</p>
+    <p>Week 1 ended with a toy: an access agent simulated in your browser. This week we build
+       the real one — first as two quick spike scripts to prove the pieces work, then ported
+       into Mastra properly so Studio can watch it think.</p>
   </div>
 </header>
 
 <section>
   <div class="wrap">
-    <h2><span class="n">1</span>Port the agent into the registry</h2>
+    <h2><span class="n">1</span>Spike the pieces first</h2>
+    <p>Two throwaway scripts, run straight from the repo's <code>week2/</code> directory — each
+       proves one risky piece before we commit to structure:</p>
+    <ul>
+      <li><a href="https://github.com/chug2k/agents-lesson/blob/main/week2/spike-github-mcp.ts"><code>spike-github-mcp.ts</code></a> —
+          can we even reach GitHub's remote MCP server? Auths with your <code>gh</code> CLI token
+          and lists the ~44 tools it exposes. (<code>npx tsx spike-github-mcp.ts</code>)</li>
+      <li><a href="https://github.com/chug2k/agents-lesson/blob/main/week2/spike-agent.ts"><code>spike-agent.ts</code></a> —
+          the whole lesson loop in miniature: an agent with a fake-HR <code>who_is</code> tool plus
+          three GitHub tools, asked whether Priya should get repo access. It prints its verdict to
+          the console. (<code>npx tsx spike-agent.ts</code>)</li>
+    </ul>
+    <p>They work — verdict and all. But they're loose scripts: open Studio and there's nothing
+       there, because Studio only shows what's <em>registered</em>. That gap is the rest of
+       this lesson.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="n">2</span>Port the agent into the registry</h2>
     <p>Four small files turn the spikes into a real Mastra project:</p>
     <ul>
       <li><code>src/mastra/tools/who-is.ts</code> — the fake-HR <code>who_is</code> tool.</li>
@@ -139,7 +159,7 @@ footer a { text-decoration: none; }
 
 <section>
   <div class="wrap">
-    <h2><span class="n">2</span>Boot Studio</h2>
+    <h2><span class="n">3</span>Boot Studio</h2>
     <pre><code>cd week2 && npm install && npm run dev</code></pre>
     <p>Studio comes up at <code>localhost:4111</code>. The Access Agent is in the list
        because it's registered — that's the difference from the spikes.</p>
@@ -152,7 +172,7 @@ footer a { text-decoration: none; }
 
 <section>
   <div class="wrap">
-    <h2><span class="n">3</span>Open the agent</h2>
+    <h2><span class="n">4</span>Open the agent</h2>
     <p>Note the tabs — Chat, Editor, Evaluate, Traces. Studio is a workbench, not just a chat window.</p>
     <figure>
       <img src="walkthrough/02-access-agent.png" alt="The Access Agent's page in Mastra Studio">
@@ -162,7 +182,7 @@ footer a { text-decoration: none; }
 
 <section>
   <div class="wrap">
-    <h2><span class="n">4</span>Test it</h2>
+    <h2><span class="n">5</span>Test it</h2>
     <p>Ask: <em>"Priya is asking for read access to the repo chug2k/churn-dashboard.
        What do you recommend?"</em></p>
     <p>The agent calls <code>who_is</code> (HR: employee, data team), then

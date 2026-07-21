@@ -15,6 +15,10 @@ registry. Here we port the agent into the project so Studio can see it.
 
 Secrets live in `.env` (gitignored) — see `.env.example` for the shape.
 
+The demo target is [`chug2k/churn-dashboard`](https://github.com/chug2k/churn-dashboard) —
+a private fixture repo whose README declares the data team as maintainer. The agent
+reads it during the GRANT run, so keep it around.
+
 ## 2. Boot Studio
 
 ```shell
